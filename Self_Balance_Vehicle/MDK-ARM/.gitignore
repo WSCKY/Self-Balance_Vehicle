@@ -1,0 +1,6 @@
+*.uvguix.*
+*.uvoptx
+*.uvprojx
+Objects/
+DebugConfig/
+
