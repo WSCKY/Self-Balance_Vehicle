@@ -26,11 +26,13 @@
 int main(void)
 {
 	LED_Init();
-	LED_ON();
+	DelayInit();
 
   /* Infinite loop */
   while (1)
   {
+		LED_TOG();
+		Delay(200);
   }
 }
 
