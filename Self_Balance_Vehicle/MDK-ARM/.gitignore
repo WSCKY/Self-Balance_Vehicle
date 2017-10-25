@@ -3,4 +3,4 @@
 *.uvprojx
 Objects/
 DebugConfig/
-
+*.scvd
