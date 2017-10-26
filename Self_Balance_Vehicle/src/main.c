@@ -18,7 +18,6 @@
 //uint8_t SendString[] = "Hello kyChu!\n";
 //TURN_DIR dirL = STOP, dirR = STOP;
 //uint16_t speedL = 0, speedR = 0;
-EulerAngle *pEulerAngle;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -38,8 +37,6 @@ int main(void)
 	EstimatorInit();
 	SysTimerInit();
 
-	pEulerAngle = GetAttitudeAngle();
-
   /* Infinite loop */
   while (1)
   {
@@ -51,12 +48,6 @@ int main(void)
 //		temp = GetMPU6050Temperature();
 //		DebugPortSendBytesDMA(SendString, 13);
   }
-}
-
-void SystemControlTask(void)
-{
-	MPU6500_Read();
-	FusionIMU_6Axis(0.001f);
 }
 
 #ifdef  USE_FULL_ASSERT
