@@ -15,7 +15,9 @@
 /* Private define -----------------------------------------------------------*/
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
-uint8_t SendString[] = "Hello kyChu!\n";
+//uint8_t SendString[] = "Hello kyChu!\n";
+TURN_DIR dirL = STOP, dirR = STOP;
+uint16_t speedL = 0, speedR = 0;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -29,13 +31,16 @@ int main(void)
 	LED_Init();
 	DelayInit();
 	DebugPortInit();
+	MotorDriverInit();
 
   /* Infinite loop */
   while (1)
   {
 		LED_TOG();
-		Delay(500);
-		DebugPortSendBytesDMA(SendString, 13);
+		Delay(200);
+		SetRunningDir(dirL, dirR);
+		SetRunningSpeed(speedL, speedR);
+//		DebugPortSendBytesDMA(SendString, 13);
   }
 }
 

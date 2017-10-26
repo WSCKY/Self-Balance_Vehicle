@@ -6,5 +6,6 @@
 #include "LED.h"
 #include "Delay.h"
 #include "Debug.h"
+#include "TB6612FNG.h"
 
 #endif /* __MAIN_H */
