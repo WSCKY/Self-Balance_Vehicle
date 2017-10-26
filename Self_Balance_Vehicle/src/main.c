@@ -18,6 +18,7 @@
 //uint8_t SendString[] = "Hello kyChu!\n";
 TURN_DIR dirL = STOP, dirR = STOP;
 uint16_t speedL = 0, speedR = 0;
+float temp = 0;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -30,6 +31,7 @@ int main(void)
 {
 	LED_Init();
 	DelayInit();
+	MPU6050_Init();
 	DebugPortInit();
 	MotorDriverInit();
 
@@ -40,6 +42,7 @@ int main(void)
 		Delay(200);
 		SetRunningDir(dirL, dirR);
 		SetRunningSpeed(speedL, speedR);
+		temp = MPU6050ReadTemperature();
 //		DebugPortSendBytesDMA(SendString, 13);
   }
 }
