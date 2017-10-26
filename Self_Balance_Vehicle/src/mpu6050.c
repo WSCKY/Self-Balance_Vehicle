@@ -58,7 +58,7 @@ void MPU6050_Init(void)
 /*
  * read mpu6500 once.
  */
-void MPU6500_Read(void)
+void MPU6500_Read(GyrRawDef *Offset, uint8_t IsOffset)
 {
 	I2C_ReadDataBufferDMA_IT(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
 	/* Reorganize received data */
@@ -80,14 +80,21 @@ void MPU6500_Read(void)
 	accVal.accY = mpu_data.accY * 0.002392578125f;
 	accVal.accZ = mpu_data.accZ * 0.002392578125f;
 	temperature = (mpu_data.temp / 340.0f) + 36.53f;
-	gyrVal.gyrX = mpu_data.gyrX * 0.06103515625f;
-	gyrVal.gyrY = mpu_data.gyrY * 0.06103515625f;
-	gyrVal.gyrZ = mpu_data.gyrZ * 0.06103515625f;
+	if(IsOffset) {
+		gyrVal.gyrX = (mpu_data.gyrX - Offset->gyrX) * 0.06103515625f;
+		gyrVal.gyrY = (mpu_data.gyrY - Offset->gyrY) * 0.06103515625f;
+		gyrVal.gyrZ = (mpu_data.gyrZ - Offset->gyrZ) * 0.06103515625f;
+	} else {
+		gyrVal.gyrX = mpu_data.gyrX * 0.06103515625f;
+		gyrVal.gyrY = mpu_data.gyrY * 0.06103515625f;
+		gyrVal.gyrZ = mpu_data.gyrZ * 0.06103515625f;
+	}
 }
 
 AccDataDef *GetAccDataPointer(void) {return &accVal;}
 GyrDataDef *GetGyrDataPointer(void) {return &gyrVal;}
 float GetMPU6050Temperature(void) {return temperature;}
+MPU_RAW *GetMPU_RawDataPointer(void) {return &mpu_data;}
 
 uint8_t MPU6050_ID = 0; /* The default value is 0x68 */
 /*
