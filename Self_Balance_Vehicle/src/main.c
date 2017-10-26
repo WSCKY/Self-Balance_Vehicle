@@ -18,9 +18,9 @@
 //uint8_t SendString[] = "Hello kyChu!\n";
 //TURN_DIR dirL = STOP, dirR = STOP;
 //uint16_t speedL = 0, speedR = 0;
-AccDataDef *pAcc;
-GyrDataDef *pGyr;
-float temp;
+//AccDataDef *pAcc;
+//GyrDataDef *pGyr;
+//float temp;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -37,20 +37,33 @@ int main(void)
 	DebugPortInit();
 	MotorDriverInit();
 
-	pAcc = GetAccDataPointer();
-	pGyr = GetGyrDataPointer();
+	SysTimerInit();
+
+//	pAcc = GetAccDataPointer();
+//	pGyr = GetGyrDataPointer();
 
   /* Infinite loop */
   while (1)
   {
-		LED_TOG();
-		Delay(200);
+//		LED_TOG();
+//		Delay(200);
 //		SetRunningDir(dirL, dirR);
 //		SetRunningSpeed(speedL, speedR);
-		MPU6500_Read();
-		temp = GetMPU6050Temperature();
+//		MPU6500_Read();
+//		temp = GetMPU6050Temperature();
 //		DebugPortSendBytesDMA(SendString, 13);
   }
+}
+
+uint32_t Tick = 0;
+void SystemControlTask(void)
+{
+	if(Tick < 500)
+		Tick ++;
+	else {
+		Tick = 0;
+		LED_TOG();
+	}
 }
 
 #ifdef  USE_FULL_ASSERT
