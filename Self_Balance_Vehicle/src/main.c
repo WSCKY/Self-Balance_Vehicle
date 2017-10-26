@@ -15,6 +15,7 @@
 /* Private define -----------------------------------------------------------*/
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
+uint8_t SendString[] = "Hello kyChu!\n";
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -27,12 +28,14 @@ int main(void)
 {
 	LED_Init();
 	DelayInit();
+	DebugPortInit();
 
   /* Infinite loop */
   while (1)
   {
 		LED_TOG();
-		Delay(200);
+		Delay(500);
+		DebugPortSendBytesDMA(SendString, 13);
   }
 }
 

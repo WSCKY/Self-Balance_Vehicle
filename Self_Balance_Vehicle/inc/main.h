@@ -5,5 +5,6 @@
 
 #include "LED.h"
 #include "Delay.h"
+#include "Debug.h"
 
 #endif /* __MAIN_H */
