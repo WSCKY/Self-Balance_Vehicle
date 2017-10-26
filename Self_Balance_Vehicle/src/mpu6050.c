@@ -205,7 +205,7 @@ static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr,
   * @brief  Reads a register of the device through I2C.
   * @param  DeviceAddr: The address of the device, could be : MPU6050_DEVICE_ADDR.
   * @param  RegisterAddr: The target register adress.
-  * @retval The value of the read register (0xAA if Timout occured)
+  * @retval The value of the read register (0xFF if Timout occured)
   */
 static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
 {
@@ -294,7 +294,9 @@ static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
   * @brief  Reads a buffer of 2 bytes from the device registers.
   * @param  DeviceAddr: The address of the device, could be : MPU6050_DEVICE_ADDR.
   * @param  RegisterAddr: The target register adress.
-  * @retval A pointer to the buffer containing the two returned bytes (in halfword).
+  * @param  pBuffer: A pointer to the buffer to store the returned bytes.
+  * @param  len: specify the length to receive from i2c.
+  * @retval 0: if all operations are OK. Other value if error.
   */
 static uint8_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len)
 {
