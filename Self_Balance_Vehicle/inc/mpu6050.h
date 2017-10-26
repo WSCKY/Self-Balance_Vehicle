@@ -31,9 +31,46 @@ typedef enum
   I2C_DMA_RX = 1
 } DMADirection_TypeDef;
 
+typedef struct {
+	int16_t accX;
+	int16_t accY;
+	int16_t accZ;
+	int16_t temp;
+	int16_t gyrX;
+	int16_t gyrY;
+	int16_t gyrZ;
+} MPU_RAW;
+
+typedef struct {
+	int16_t accX;
+	int16_t accY;
+	int16_t accZ;
+} AccRawDef;
+
+typedef struct {
+	int16_t gyrX;
+	int16_t gyrY;
+	int16_t gyrZ;
+} GyrRawDef;
+
+typedef struct {
+	float accX;
+	float accY;
+	float accZ;
+} AccDataDef;
+
+typedef struct {
+	float gyrX;
+	float gyrY;
+	float gyrZ;
+} GyrDataDef;
+
 #define MPU6050_DEVICE_ADDR            0xD0
 
 void MPU6050_Init(void);
-float MPU6050ReadTemperature(void);
+void MPU6500_Read(void);
+AccDataDef *GetAccDataPointer(void);
+GyrDataDef *GetGyrDataPointer(void);
+float GetMPU6050Temperature(void);
 
 #endif /* __MPU6050_H */

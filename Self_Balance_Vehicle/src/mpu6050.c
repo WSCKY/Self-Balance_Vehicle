@@ -1,15 +1,20 @@
 #include "mpu6050.h"
 
 #define TIMEOUT_MAX             0x1000   /*<! The value of the maximal timeout for I2C waiting loops */
-
 uint32_t I2C_TimeOut = TIMEOUT_MAX; /*<! Value of Timeout when I2C communication fails */
+
+static MPU_RAW mpu_data;
+static AccDataDef accVal;
+static GyrDataDef gyrVal;
+static float temperature = 0;
+static uint8_t mpu_rx_buffer[14] = {0};
 
 static void i2c_config(void);
 static void mpu6050_config(void);
 
 static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr, uint8_t RegisterValue);
 static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr);
-static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t len);
+static uint8_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len);
 static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len);
 static uint8_t I2C_TimeoutUserCallback(void);
 
@@ -35,11 +40,39 @@ void MPU6050_Init(void)
 	mpu6050_config();
 }
 
-float MPU6050ReadTemperature(void)
+/*
+ * read mpu6500 once.
+ */
+void MPU6500_Read(void)
 {
-	int16_t tmp = (int16_t)I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x41, 2);
-	return ((tmp / 340.0f) + 36.53);
+	I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
+	/* Reorganize received data */
+	((uint8_t *)&mpu_data.accX)[1] = mpu_rx_buffer[0];
+	((uint8_t *)&mpu_data.accX)[0] = mpu_rx_buffer[1];
+	((uint8_t *)&mpu_data.accY)[1] = mpu_rx_buffer[2];
+	((uint8_t *)&mpu_data.accY)[0] = mpu_rx_buffer[3];
+	((uint8_t *)&mpu_data.accZ)[1] = mpu_rx_buffer[4];
+	((uint8_t *)&mpu_data.accZ)[0] = mpu_rx_buffer[5];
+	((uint8_t *)&mpu_data.temp)[1] = mpu_rx_buffer[6];
+	((uint8_t *)&mpu_data.temp)[0] = mpu_rx_buffer[7];
+	((uint8_t *)&mpu_data.gyrX)[1] = mpu_rx_buffer[8];
+	((uint8_t *)&mpu_data.gyrX)[0] = mpu_rx_buffer[9];
+	((uint8_t *)&mpu_data.gyrY)[1] = mpu_rx_buffer[10];
+	((uint8_t *)&mpu_data.gyrY)[0] = mpu_rx_buffer[11];
+	((uint8_t *)&mpu_data.gyrZ)[1] = mpu_rx_buffer[12];
+	((uint8_t *)&mpu_data.gyrZ)[0] = mpu_rx_buffer[13];
+	accVal.accX = mpu_data.accX * 0.002392578125f;
+	accVal.accY = mpu_data.accY * 0.002392578125f;
+	accVal.accZ = mpu_data.accZ * 0.002392578125f;
+	temperature = (mpu_data.temp / 340.0f) + 36.53f;
+	gyrVal.gyrX = mpu_data.gyrX * 0.06103515625f;
+	gyrVal.gyrY = mpu_data.gyrY * 0.06103515625f;
+	gyrVal.gyrZ = mpu_data.gyrZ * 0.06103515625f;
 }
+
+AccDataDef *GetAccDataPointer(void) {return &accVal;}
+GyrDataDef *GetGyrDataPointer(void) {return &gyrVal;}
+float GetMPU6050Temperature(void) {return temperature;}
 
 uint8_t MPU6050_ID = 0; /* The default value is 0x68 */
 /*
@@ -263,13 +296,10 @@ static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
   * @param  RegisterAddr: The target register adress.
   * @retval A pointer to the buffer containing the two returned bytes (in halfword).
   */
-static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t len)
+static uint8_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len)
 {
-  uint8_t tmp = 0;
-  uint8_t I2C_BufferRX[2] = {0x00, 0x00};
-
   /* Configure DMA Peripheral */
-  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)I2C_BufferRX, len);
+  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)pBuffer, len);
 
   /* Enable DMA NACK automatic generation */
   I2C_DMALastTransferCmd(MPU6050_I2C, ENABLE);
@@ -343,13 +373,8 @@ static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, ui
 	/* Clear DMA RX Transfer Complete Flag */
 	DMA_ClearFlag(MPU6050_I2C_DMA_RX_TCFLAG);
 
-	/* Reorganize received data */
-	tmp = I2C_BufferRX[0];
-	I2C_BufferRX[0] = I2C_BufferRX[1];
-	I2C_BufferRX[1] = tmp;
-
 	/* return a pointer to the IOE_Buffer */
-	return *(uint16_t *)I2C_BufferRX;
+	return 0;
 }
 
 /**
