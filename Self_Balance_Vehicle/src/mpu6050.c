@@ -9,8 +9,8 @@ static void mpu6050_config(void);
 
 static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr, uint8_t RegisterValue);
 static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr);
-static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr);
-static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer);
+static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t len);
+static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len);
 static uint8_t I2C_TimeoutUserCallback(void);
 
 /*
@@ -37,7 +37,7 @@ void MPU6050_Init(void)
 
 float MPU6050ReadTemperature(void)
 {
-	int16_t tmp = (int16_t)I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x41);
+	int16_t tmp = (int16_t)I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x41, 2);
 	return ((tmp / 340.0f) + 36.53);
 }
 
@@ -92,7 +92,7 @@ static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr,
 	I2C_BufferTX = RegisterValue;
 
 	/* Configure DMA Peripheral */
-	I2C_DMA_Config(I2C_DMA_TX, (uint8_t *)(&I2C_BufferTX));
+	I2C_DMA_Config(I2C_DMA_TX, (uint8_t *)(&I2C_BufferTX), 1);
 
 	/* Enable the I2C peripheral */
 	I2C_GenerateSTART(MPU6050_I2C, ENABLE);
@@ -176,10 +176,10 @@ static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr,
   */
 static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
 {
-  uint8_t IOE_BufferRX[2] = {0x00, 0x00};
+  uint8_t I2C_BufferRX[2] = {0x00, 0x00};
 
   /* Configure DMA Peripheral */
-  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)IOE_BufferRX);
+  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)I2C_BufferRX, 2);
 
   /* Enable DMA NACK automatic generation */
   I2C_DMALastTransferCmd(MPU6050_I2C, ENABLE);
@@ -254,7 +254,7 @@ static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
   DMA_ClearFlag(MPU6050_I2C_DMA_RX_TCFLAG);
 
   /* return a pointer to the IOE_Buffer */
-  return (uint8_t)IOE_BufferRX[0];
+  return (uint8_t)I2C_BufferRX[0];
 }
 
 /**
@@ -263,13 +263,13 @@ static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
   * @param  RegisterAddr: The target register adress.
   * @retval A pointer to the buffer containing the two returned bytes (in halfword).
   */
-static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr)
+static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t len)
 {
   uint8_t tmp = 0;
   uint8_t I2C_BufferRX[2] = {0x00, 0x00};
 
   /* Configure DMA Peripheral */
-  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)I2C_BufferRX);
+  I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)I2C_BufferRX, len);
 
   /* Enable DMA NACK automatic generation */
   I2C_DMALastTransferCmd(MPU6050_I2C, ENABLE);
@@ -357,7 +357,7 @@ static uint16_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr)
   * @param  None
   * @retval None
   */
-static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer)
+static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len)
 {
 	DMA_InitTypeDef DMA_InitStructure;
 
@@ -388,7 +388,7 @@ static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer)
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 
 		/* Initialize the DMA_BufferSize member */
-		DMA_InitStructure.DMA_BufferSize = 2;
+		DMA_InitStructure.DMA_BufferSize = len;
 
 		DMA_DeInit(MPU6050_I2C_DMA_RX_CHANNEL);
 
@@ -400,7 +400,7 @@ static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer)
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 
 		/* Initialize the DMA_BufferSize member */
-		DMA_InitStructure.DMA_BufferSize = 1;
+		DMA_InitStructure.DMA_BufferSize = len;
 
 		DMA_DeInit(MPU6050_I2C_DMA_TX_CHANNEL);
 
