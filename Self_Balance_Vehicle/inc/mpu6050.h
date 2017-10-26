@@ -25,6 +25,11 @@
 #define MPU6050_I2C_DMA_TX_TCFLAG      DMA1_FLAG_TC6
 #define MPU6050_I2C_DMA_RX_TCFLAG      DMA1_FLAG_TC7
 
+#define MPU6050_I2C_Tx_DMA_IRQn        DMA1_Channel6_IRQn
+#define MPU6050_I2C_Tx_DMA_IRQHandler  DMA1_Channel6_IRQHandler
+#define MPU6050_I2C_Rx_DMA_IRQn        DMA1_Channel7_IRQn
+#define MPU6050_I2C_Rx_DMA_IRQHandler  DMA1_Channel7_IRQHandler
+
 typedef enum
 {
   I2C_DMA_TX = 0,

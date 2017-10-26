@@ -3,18 +3,24 @@
 #define TIMEOUT_MAX             0x1000   /*<! The value of the maximal timeout for I2C waiting loops */
 uint32_t I2C_TimeOut = TIMEOUT_MAX; /*<! Value of Timeout when I2C communication fails */
 
+static DMA_InitTypeDef DMA_InitStructure;
+
 static MPU_RAW mpu_data;
 static AccDataDef accVal;
 static GyrDataDef gyrVal;
 static float temperature = 0;
 static uint8_t mpu_rx_buffer[14] = {0};
 
+static uint8_t rx_comp_flag = 1;
+
 static void i2c_config(void);
 static void mpu6050_config(void);
 
+static void I2C_DMA_InitConfig(void);
 static uint8_t I2C_WriteDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr, uint8_t RegisterValue);
 static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr);
 static uint8_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len);
+static uint8_t I2C_ReadDataBufferDMA_IT(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len);
 static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len);
 static uint8_t I2C_TimeoutUserCallback(void);
 
@@ -24,6 +30,7 @@ static uint8_t I2C_TimeoutUserCallback(void);
 void MPU6050_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
 
 	/* GPIO Periph clock enable */
 	RCC_APB2PeriphClockCmd(MPU6050_GPIO_PORT_CLK | RCC_APB2Periph_AFIO, ENABLE);
@@ -35,6 +42,14 @@ void MPU6050_Init(void)
 	GPIO_InitStructure.GPIO_Pin = MPU6050_GPIO_SCL_PIN | MPU6050_GPIO_SDA_PIN;
 	GPIO_Init(MPU6050_GPIO_PORT, &GPIO_InitStructure);
 
+	/* Configure the MPU6050_I2C_DMA_Rx_Channel Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = MPU6050_I2C_Rx_DMA_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+	I2C_DMA_InitConfig();
 	i2c_config();
 	Delay(100);
 	mpu6050_config();
@@ -45,7 +60,7 @@ void MPU6050_Init(void)
  */
 void MPU6500_Read(void)
 {
-	I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
+	I2C_ReadDataBufferDMA_IT(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
 	/* Reorganize received data */
 	((uint8_t *)&mpu_data.accX)[1] = mpu_rx_buffer[0];
 	((uint8_t *)&mpu_data.accX)[0] = mpu_rx_buffer[1];
@@ -87,6 +102,8 @@ static void mpu6050_config(void)
 	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1C, 0x02 << 3);
 
 	MPU6050_ID = I2C_ReadDeviceRegister(MPU6050_DEVICE_ADDR, 0x75);
+	/* read once */
+	I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
 }
 
 /*
@@ -291,7 +308,7 @@ static uint8_t I2C_ReadDeviceRegister(uint8_t DeviceAddr, uint8_t RegisterAddr)
 }
 
 /**
-  * @brief  Reads a buffer of 2 bytes from the device registers.
+  * @brief  Reads a buffer of len bytes from the device registers.
   * @param  DeviceAddr: The address of the device, could be : MPU6050_DEVICE_ADDR.
   * @param  RegisterAddr: The target register adress.
   * @param  pBuffer: A pointer to the buffer to store the returned bytes.
@@ -380,20 +397,96 @@ static uint8_t I2C_ReadDataBuffer(uint8_t DeviceAddr, uint32_t RegisterAddr, uin
 }
 
 /**
-  * @brief  Configure the DMA Peripheral used to handle communication via I2C.
+  * @brief  Reads a buffer of len bytes from the device registers.
+  * @param  DeviceAddr: The address of the device, could be : MPU6050_DEVICE_ADDR.
+  * @param  RegisterAddr: The target register adress.
+  * @param  pBuffer: A pointer to the buffer to store the returned bytes.
+  * @param  len: specify the length to receive from i2c.
+  * @retval 0: if all operations are OK. Other value if error.
+  */
+static uint8_t I2C_ReadDataBufferDMA_IT(uint8_t DeviceAddr, uint32_t RegisterAddr, uint8_t *pBuffer, uint8_t len)
+{
+	if(rx_comp_flag) {
+		/* Configure DMA Peripheral */
+		I2C_DMA_Config(I2C_DMA_RX, (uint8_t*)pBuffer, len);
+
+		/* Enable DMA NACK automatic generation */
+		I2C_DMALastTransferCmd(MPU6050_I2C, ENABLE);
+
+		/* Enable the I2C peripheral */
+		I2C_GenerateSTART(MPU6050_I2C, ENABLE);
+
+		/* Test on SB Flag */
+		I2C_TimeOut = TIMEOUT_MAX;
+		while (!I2C_GetFlagStatus(MPU6050_I2C, I2C_FLAG_SB)) {
+			if (I2C_TimeOut -- == 0) return (I2C_TimeoutUserCallback());
+		}
+
+		/* Send device address for write */
+		I2C_Send7bitAddress(MPU6050_I2C, DeviceAddr, I2C_Direction_Transmitter);
+
+		/* Test on ADDR Flag */
+		I2C_TimeOut = TIMEOUT_MAX;
+		while (!I2C_CheckEvent(MPU6050_I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) {
+			if (I2C_TimeOut -- == 0) return (I2C_TimeoutUserCallback());
+		}
+
+		/* Send the device's internal address to write to */
+		I2C_SendData(MPU6050_I2C, RegisterAddr);
+
+		/* Test on TXE FLag (data dent) */
+		I2C_TimeOut = TIMEOUT_MAX;
+		while ((!I2C_GetFlagStatus(MPU6050_I2C, I2C_FLAG_TXE)) && (!I2C_GetFlagStatus(MPU6050_I2C, I2C_FLAG_BTF))) {
+			if (I2C_TimeOut -- == 0) return (I2C_TimeoutUserCallback());
+		}
+
+		/* Send START condition a second time */
+		I2C_GenerateSTART(MPU6050_I2C, ENABLE);
+
+		/* Test on SB Flag */
+		I2C_TimeOut = TIMEOUT_MAX;
+		while (!I2C_GetFlagStatus(MPU6050_I2C, I2C_FLAG_SB)) {
+			if (I2C_TimeOut -- == 0) return (I2C_TimeoutUserCallback());
+		}
+
+		/* Send IOExpander address for read */
+		I2C_Send7bitAddress(MPU6050_I2C, DeviceAddr, I2C_Direction_Receiver);
+
+		/* Test on ADDR Flag */
+		I2C_TimeOut = TIMEOUT_MAX;
+		while (!I2C_CheckEvent(MPU6050_I2C, I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED)) {
+			if (I2C_TimeOut -- == 0) return (I2C_TimeoutUserCallback());
+		}
+
+		rx_comp_flag = 0;
+
+		/* Enable I2C DMA Transfer complete interrupt */
+		DMA_ITConfig(MPU6050_I2C_DMA_RX_CHANNEL, DMA_IT_TC, ENABLE);
+
+		/* Enable I2C DMA request */
+		I2C_DMACmd(MPU6050_I2C, ENABLE);
+
+		/* Enable DMA RX Channel */
+		DMA_Cmd(MPU6050_I2C_DMA_RX_CHANNEL, ENABLE);
+
+		/* return error */
+		return 0;
+	} else return 1;
+}
+
+/**
+  * @brief  Initialize the Configuration of the DMA Peripheral used to handle communication via I2C.
   * @param  None
   * @retval None
   */
-static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len)
+static void I2C_DMA_InitConfig(void)
 {
-	DMA_InitTypeDef DMA_InitStructure;
-
 	RCC_AHBPeriphClockCmd(MPU6050_I2C_DMA_CLK, ENABLE);
 
 	/* Initialize the DMA_PeripheralBaseAddr member */
 	DMA_InitStructure.DMA_PeripheralBaseAddr = MPU6050_I2C_DR;
 	/* Initialize the DMA_MemoryBaseAddr member */
-	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)buffer;
+	DMA_InitStructure.DMA_MemoryBaseAddr = 0;
 	/* Initialize the DMA_PeripheralInc member */
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	/* Initialize the DMA_MemoryInc member */
@@ -408,9 +501,24 @@ static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
 	/* Initialize the DMA_M2M member */
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
+	/* Initialize the DMA_DIR member */
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	/* Initialize the DMA_BufferSize member */
+	DMA_InitStructure.DMA_BufferSize = 0;
+}
 
+/**
+  * @brief  Configure the DMA Peripheral used to handle communication via I2C.
+  * @param  None
+  * @retval None
+  */
+static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint8_t len)
+{
 	/* If using DMA for Reception */
 	if (Direction == I2C_DMA_RX) {
+		/* Initialize the DMA_MemoryBaseAddr member */
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)buffer;
+
 		/* Initialize the DMA_DIR member */
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
 
@@ -423,6 +531,9 @@ static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint
 	}
 	/* If using DMA for Transmission */
 	else if (Direction == I2C_DMA_TX) {
+		/* Initialize the DMA_MemoryBaseAddr member */
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)buffer;
+
 		/* Initialize the DMA_DIR member */
 		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
 
@@ -432,6 +543,25 @@ static void I2C_DMA_Config(DMADirection_TypeDef Direction, uint8_t* buffer, uint
 		DMA_DeInit(MPU6050_I2C_DMA_TX_CHANNEL);
 
 		DMA_Init(MPU6050_I2C_DMA_TX_CHANNEL, &DMA_InitStructure);
+	}
+}
+
+void MPU6050_I2C_Rx_DMA_IRQHandler(void)
+{
+	/* DMA Transfer Completed */
+	if(DMA_GetFlagStatus(MPU6050_I2C_DMA_RX_TCFLAG)) {
+		rx_comp_flag = 1;
+
+		/* Send STOP Condition */
+		I2C_GenerateSTOP(MPU6050_I2C, ENABLE);
+		/* Disable DMA RX Channel */
+		DMA_Cmd(MPU6050_I2C_DMA_RX_CHANNEL, DISABLE);
+		/* Disable I2C DMA request */
+		I2C_DMACmd(MPU6050_I2C, DISABLE);
+		/* Disable I2C DMA Transfer complete interrupt */
+		DMA_ITConfig(MPU6050_I2C_DMA_RX_CHANNEL, DMA_IT_TC, DISABLE);
+		/* Clear DMA RX Transfer Complete Flag */
+		DMA_ClearFlag(MPU6050_I2C_DMA_RX_TCFLAG);
 	}
 }
 
