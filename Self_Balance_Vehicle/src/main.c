@@ -18,9 +18,7 @@
 //uint8_t SendString[] = "Hello kyChu!\n";
 //TURN_DIR dirL = STOP, dirR = STOP;
 //uint16_t speedL = 0, speedR = 0;
-AccDataDef *pAcc;
-GyrDataDef *pGyr;
-float temp;
+EulerAngle *pEulerAngle;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -37,10 +35,10 @@ int main(void)
 	DebugPortInit();
 	MotorDriverInit();
 
+	EstimatorInit();
 	SysTimerInit();
 
-	pAcc = GetAccDataPointer();
-	pGyr = GetGyrDataPointer();
+	pEulerAngle = GetAttitudeAngle();
 
   /* Infinite loop */
   while (1)
@@ -58,7 +56,7 @@ int main(void)
 void SystemControlTask(void)
 {
 	MPU6500_Read();
-	temp = GetMPU6050Temperature();
+	FusionIMU_6Axis(0.001f);
 }
 
 #ifdef  USE_FULL_ASSERT

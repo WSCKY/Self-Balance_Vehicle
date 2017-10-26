@@ -10,4 +10,6 @@
 #include "SysTimer.h"
 #include "TB6612FNG.h"
 
+#include "AttitudeEstimator.h"
+
 #endif /* __MAIN_H */
