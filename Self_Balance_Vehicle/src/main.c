@@ -42,6 +42,12 @@ int main(void)
   {
 		SendDataToMonitor();
 		Delay(5);
+		if(BUTTON_PRESSED()) {
+			LED_ON();
+		} else {
+			LED_OFF();
+		}
+
 //		LED_TOG();
 //		Delay(200);
 //		SetRunningDir(dirL, dirR);

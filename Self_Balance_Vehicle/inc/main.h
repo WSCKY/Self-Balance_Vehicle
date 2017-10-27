@@ -6,6 +6,7 @@
 #include "LED.h"
 #include "Delay.h"
 #include "Debug.h"
+#include "Button.h"
 #include "mpu6050.h"
 #include "SysTimer.h"
 #include "TB6612FNG.h"
