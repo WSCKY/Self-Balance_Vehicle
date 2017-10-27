@@ -24,13 +24,14 @@ void SystemControlTask(void)
 	}
 	MPU6500_Read(&GyrOffset, IMU_Stabled);
 
-	IMU_StableCheck();
+//	if(!IMU_Stabled)
+		IMU_StableCheck();
 
 	if(IMU_Stabled) {
 		FusionIMU_6Axis(0.001f);
 	}
 }
-uint16_t tub = 0;
+//uint16_t tub = 0;
 static uint16_t StableTimeCnt = 0;
 static int16_t old_gx = 0, old_gy = 0, old_gz = 0;
 /*
@@ -39,8 +40,8 @@ static int16_t old_gx = 0, old_gy = 0, old_gz = 0;
 static uint8_t IMU_StableCheck(void)
 {
 	uint8_t ret = 0;
-	tub = (ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz));
-	if((ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz)) < 10) {
+//	tub = (ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz));
+	if((ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz)) < 5) {
 		if(StableTimeCnt < 1000)
 			StableTimeCnt ++;
 		else {
