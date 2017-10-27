@@ -102,12 +102,16 @@ uint8_t MPU6050_ID = 0; /* The default value is 0x68 */
  */
 static void mpu6050_config(void)
 {
-	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x6B, 0x03);
+	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x6B, 0x80);
+	Delay(20);
+	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x68, 0x07);
+	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x6B, 0x00);
+	Delay(20);
 	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x19, 0x00);
 	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1A, 0x03);
-	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1B, 0x03 << 3);
-	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1C, 0x02 << 3);
-
+	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1B, 0x18);
+	I2C_WriteDeviceRegister(MPU6050_DEVICE_ADDR, 0x1C, 0x10);
+	Delay(2);
 	MPU6050_ID = I2C_ReadDeviceRegister(MPU6050_DEVICE_ADDR, 0x75);
 	/* read once */
 	I2C_ReadDataBuffer(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
