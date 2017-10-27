@@ -11,5 +11,6 @@
 #include "TB6612FNG.h"
 
 #include "MainCtrl.h"
+#include "DataMonitor.h"
 
 #endif /* __MAIN_H */

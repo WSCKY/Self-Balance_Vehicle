@@ -40,8 +40,10 @@ int main(void)
   /* Infinite loop */
   while (1)
   {
-		LED_TOG();
-		Delay(200);
+		SendDataToMonitor();
+		Delay(5);
+//		LED_TOG();
+//		Delay(200);
 //		SetRunningDir(dirL, dirR);
 //		SetRunningSpeed(speedL, speedR);
 //		MPU6500_Read();
