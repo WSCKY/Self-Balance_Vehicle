@@ -41,7 +41,7 @@ static uint8_t IMU_StableCheck(void)
 	uint8_t ret = 0;
 	tub = (ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz));
 	if((ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz)) < 10) {
-		if(StableTimeCnt < 100)
+		if(StableTimeCnt < 1000)
 			StableTimeCnt ++;
 		else {
 			GyrOffset.gyrX = pMPU->gyrX;
