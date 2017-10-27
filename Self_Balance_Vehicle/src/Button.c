@@ -1,5 +1,8 @@
 #include "Button.h"
 
+/*
+ * Configure Button GPIO periph.
+ */
 void ButtonInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -13,5 +16,3 @@ void ButtonInit(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;;
 	GPIO_Init(BUTTON_GPIO_PORT, &GPIO_InitStructure);
 }
-
-
