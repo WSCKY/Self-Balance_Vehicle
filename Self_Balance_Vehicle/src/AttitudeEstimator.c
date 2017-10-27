@@ -30,27 +30,18 @@ void FusionIMU_6Axis(float dt)
 
 	float delta2;
 
-	float qw_last;
-	float qx_last;
-	float qy_last;
-	float qz_last;
+	float qw_last = AttitudeQuat.qw;
+	float qx_last = AttitudeQuat.qx;
+	float qy_last = AttitudeQuat.qy;
+	float qz_last = AttitudeQuat.qz;
 
-	qw = AttitudeQuat.qw;
-	qx = AttitudeQuat.qx;
-	qy = AttitudeQuat.qy;
-	qz = AttitudeQuat.qz;
-
-	gx = pGyr->gyrX;//gyro->gyroUnitX;
-	gy = pGyr->gyrY;//gyro->gyroUnitY;
-	gz = pGyr->gyrZ;//gyro->gyroUnitZ;
+	gx = pGyr->gyrX * DEG_TO_RAD;
+	gy = pGyr->gyrY * DEG_TO_RAD;
+	gz = pGyr->gyrZ * DEG_TO_RAD;
 
 	ax = pAcc->accX;
 	ay = pAcc->accY;
 	az = pAcc->accZ;
-
-	gx *= DEG_TO_RAD;
-	gy *= DEG_TO_RAD;
-	gz *= DEG_TO_RAD;
 
 	// Compute feedback only if accelerometer measurement valid (avoids NaN in accelerometer normalisation)
 	if(!((ax == 0.0f) && (ay == 0.0f) && (az == 0.0f)))
@@ -62,9 +53,9 @@ void FusionIMU_6Axis(float dt)
 		az *= recipNorm;
 
 		// Estimated direction of gravity and vector perpendicular to magnetic flux
-		halfvx = qx * qz - qw * qy;
-		halfvy = qw * qx + qy * qz;
-		halfvz = qw * qw - 0.5f + qz * qz;
+		halfvx = qx_last * qz_last - qw_last * qy_last;
+		halfvy = qw_last * qx_last + qy_last * qz_last;
+		halfvz = qw_last * qw_last - 0.5f + qz_last * qz_last;
 
 		// Error is sum of cross product between estimated and measured direction of gravity
 		halfex = (ay * halfvz - az * halfvy);
@@ -72,7 +63,6 @@ void FusionIMU_6Axis(float dt)
 		halfez = (ax * halfvy - ay * halfvx);
 
 		// Compute and apply integral feedback if enabled
-
 		integralFBx += twoKi * halfex * dt;  // integral error scaled by Ki
 		integralFBy += twoKi * halfey * dt;
 		integralFBz += twoKi * halfez * dt;
@@ -87,11 +77,6 @@ void FusionIMU_6Axis(float dt)
 	}
 
 	delta2 = (gx*gx + gy*gy + gz*gz)*dt*dt;
-
-	qw_last = qw;
-	qx_last = qx;
-	qy_last = qy;
-	qz_last = qz;
 
 	qw = qw_last*(1.0f-delta2*0.125f) + (-qx_last*gx - qy_last*gy - qz_last*gz)*0.5f * dt;
 	qx = qx_last*(1.0f-delta2*0.125f) + (qw_last*gx + qy_last*gz - qz_last*gy)*0.5f * dt;
