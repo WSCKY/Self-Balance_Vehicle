@@ -15,9 +15,12 @@
 /* Private define -----------------------------------------------------------*/
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
-//uint8_t SendString[] = "Hello kyChu!\n";
-//TURN_DIR dirL = STOP, dirR = STOP;
-//uint16_t speedL = 0, speedR = 0;
+TURN_DIR dirL = STOP, dirR = STOP;
+uint16_t speedL = 0, speedR = 0;
+//uint8_t BeepStart = 0;
+//TURN_DIR dir = STOP;
+//uint16_t sound = 0;
+//uint16_t freq = 500;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -50,11 +53,17 @@ int main(void)
 
 //		LED_TOG();
 //		Delay(200);
-//		SetRunningDir(dirL, dirR);
-//		SetRunningSpeed(speedL, speedR);
-//		MPU6500_Read();
-//		temp = GetMPU6050Temperature();
-//		DebugPortSendBytesDMA(SendString, 13);
+		SetRunningDir(dirL, dirR);
+		SetRunningSpeed(speedL, speedR);
+
+//		if(BeepStart) {
+//			SetRunningDir(FWD, FWD);
+//			SetRunningSpeed(sound, sound);
+//			Delay(freq);
+//			SetRunningDir(REV, REV);
+//			SetRunningSpeed(sound, sound);
+//			Delay(freq);
+//		}
   }
 }
 
