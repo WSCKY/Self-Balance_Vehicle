@@ -25,9 +25,9 @@ static PID SpeedPID = {0};
 static void ControllerInit(void)
 {
 	SpeedPID.dt = 0.01f;
-	SpeedPID.kp = 2.8f;
-	SpeedPID.ki = 0.1f;
-	SpeedPID.I_max = 200.0f;
+	SpeedPID.kp = 6.0f;
+	SpeedPID.ki = 1.0f;
+	SpeedPID.I_max = 300.0f;
 	SpeedPID.I_sum = 0.0f;
 }
 
