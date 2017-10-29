@@ -64,7 +64,7 @@ void SystemControlTask(void) /* 1ms */
 		RunEnableFlag = 0;
 	}
 
-	AttitudeControlLoop(-1.5f, RunEnableFlag);
+	AttitudeControlLoop(-1.8f, RunEnableFlag);
 	SpeedControlLoop(0, RunEnableFlag);
 
 	if(RunEnableFlag == 0) {
