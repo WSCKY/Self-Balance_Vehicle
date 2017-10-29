@@ -2,9 +2,12 @@
 #define __SPEEDCONTROLLER_H
 
 #include "Encoder.h"
+#include "pidController.h"
 
 #define SpeedReadDiv                   (10)
 
 void SpeedComputeTask(void);
+void SpeedControlLoop(float ExpVel, uint8_t ControllerEnable);
+float GetSpeedControllerOutput(void);
 
 #endif /* __SPEEDCONTROLLER_H */
