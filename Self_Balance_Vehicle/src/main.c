@@ -15,8 +15,8 @@
 /* Private define -----------------------------------------------------------*/
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
-TURN_DIR dirL = STOP, dirR = STOP;
-uint16_t speedL = 0, speedR = 0;
+//TURN_DIR dirL = STOP, dirR = STOP;
+//uint16_t speedL = 0, speedR = 0;
 //uint8_t BeepStart = 0;
 //TURN_DIR dir = STOP;
 //uint16_t sound = 0;
@@ -46,16 +46,16 @@ int main(void)
   {
 		SendDataToMonitor();
 		Delay(5);
-		if(BUTTON_PRESSED()) {
-			LED_ON();
-		} else {
-			LED_OFF();
-		}
+//		if(BUTTON_PRESSED()) {
+//			LED_ON();
+//		} else {
+//			LED_OFF();
+//		}
 
 //		LED_TOG();
 //		Delay(200);
-		SetRunningDir(dirL, dirR);
-		SetRunningSpeed(speedL, speedR);
+//		SetRunningDir(dirL, dirR);
+//		SetRunningSpeed(speedL, speedR);
 
 //		if(BeepStart) {
 //			SetRunningDir(FWD, FWD);
