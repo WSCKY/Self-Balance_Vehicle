@@ -7,6 +7,10 @@ static MPU_RAW *pMPU;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
+#define SpeedReadDiv         (10)
+uint8_t SpeedReadDelay = 0;
+int16_t MotorSpeed_L = 0, MotorSpeed_R = 0;
+
 static uint8_t IMU_StableCheck(void);
 
 void MainCtrlLoopInit(void)
@@ -15,7 +19,7 @@ void MainCtrlLoopInit(void)
 	pEulerAngle = GetAttitudeAngle();
 }
 
-void SystemControlTask(void)
+void SystemControlTask(void) /* 1ms */
 {
 	if(_init_flag == 0) {
 		_init_flag = 1;
@@ -23,6 +27,14 @@ void SystemControlTask(void)
 		MainCtrlLoopInit();
 	}
 	MPU6500_Read(&GyrOffset, IMU_Stabled);
+
+	/* Read Per (SpeedReadDiv)ms */
+	SpeedReadDelay ++;
+	if(SpeedReadDelay >= SpeedReadDiv) {
+		SpeedReadDelay = 0;
+		MotorSpeed_L = ReadEncoderCounter(Encoder_L);
+		MotorSpeed_R = ReadEncoderCounter(Encoder_R);
+	}
 
 //	if(!IMU_Stabled)
 		IMU_StableCheck();
