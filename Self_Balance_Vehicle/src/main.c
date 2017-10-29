@@ -36,6 +36,7 @@ int main(void)
 	MPU6050_Init();
 	DebugPortInit();
 	MotorDriverInit();
+	EncoderDriverInit();
 
 	EstimatorInit();
 	SysTimerInit();

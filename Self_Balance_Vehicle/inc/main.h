@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "Button.h"
 #include "mpu6050.h"
+#include "Encoder.h"
 #include "SysTimer.h"
 #include "TB6612FNG.h"
 
