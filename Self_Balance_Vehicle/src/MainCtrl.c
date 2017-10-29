@@ -58,6 +58,7 @@ void SystemControlTask(void) /* 1ms */
 	}
 
 	AttitudeControlLoop(0, RunEnableFlag);
+	SpeedControlLoop(0, RunEnableFlag);
 
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
@@ -65,6 +66,8 @@ void SystemControlTask(void) /* 1ms */
 		LED_OFF();
 	} else {
 		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR);
+		ExpSpeedL += GetSpeedControllerOutput();
+		ExpSpeedR += GetSpeedControllerOutput();
 		if(ExpSpeedL >= 0) ExpDirL = FWD; else ExpDirL = REV;
 		if(ExpSpeedR >= 0) ExpDirR = FWD; else ExpDirR = REV;
 		SetRunningDir(ExpDirL, ExpDirR);
