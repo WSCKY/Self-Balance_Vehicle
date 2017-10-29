@@ -102,6 +102,8 @@ void SetRunningDir(TURN_DIR dir_L, TURN_DIR dir_R)
 
 void SetRunningSpeed(uint16_t spd_L, uint16_t spd_R)
 {
+	if(spd_L > 800) spd_L = 800;
+	if(spd_R > 800) spd_R = 800;
 	TB_TIMER->CCR1 = spd_L;
 	TB_TIMER->CCR4 = spd_R;
 }
