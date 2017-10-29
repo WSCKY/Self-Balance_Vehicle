@@ -23,6 +23,7 @@ void DataPackageChkSum(COMM_DATA *pComData)
 	pComData->checksum = chk;
 }
 //extern uint16_t tub;
+extern int16_t MotorSpeed_L, MotorSpeed_R;
 void SendDataToMonitor(void)
 {
 	if(_init_flag == 0) {
@@ -36,8 +37,8 @@ void SendDataToMonitor(void)
 		return;
 	}
 
-	ComDataBuf.ComData.data[0].f_data = pAcc->accX;
-	ComDataBuf.ComData.data[1].f_data = pAcc->accY;
+	ComDataBuf.ComData.data[0].f_data = MotorSpeed_L;//pAcc->accX;//
+	ComDataBuf.ComData.data[1].f_data = MotorSpeed_R;//pAcc->accY;//
 	ComDataBuf.ComData.data[2].f_data = pAcc->accZ;
 	ComDataBuf.ComData.data[3].f_data = pGyr->gyrX;
 	ComDataBuf.ComData.data[4].f_data = pGyr->gyrY;
