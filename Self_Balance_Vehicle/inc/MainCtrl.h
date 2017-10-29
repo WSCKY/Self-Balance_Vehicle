@@ -1,6 +1,7 @@
 #ifndef __MAINCTRL_H
 #define __MAINCTRL_H
 
+#include "LED.h"
 #include "Button.h"
 #include "Encoder.h"
 #include "TB6612FNG.h"
