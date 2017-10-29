@@ -15,19 +15,19 @@ static void ControllerInit(void)
 	pEulerAngle = GetAttitudeAngle();
 
 	AnglePID.dt = 0.01f;
-	AnglePID.kp = 1.0f;
-	AnglePID.ki = 0.0f;
-	AnglePID.I_max = 0.0f;
+	AnglePID.kp = 160.0f;
+	AnglePID.ki = 20.0f;
+	AnglePID.I_max = 600.0f;
 	AnglePID.I_sum = 0.0f;
 
 	GyrosPID.dt = 0.005f;
-	GyrosPID.kp = 1.0f;
+	GyrosPID.kp = 0.4f;
 	GyrosPID.ki = 0.0f;
 	GyrosPID.I_max = 0.0f;
 	GyrosPID.I_sum = 0.0f;
 }
 
-void AttitudeControlLoop(uint8_t ExpAngle, uint8_t ControllerEnable)
+void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable)
 {
 	if(_init_flag == 0) {
 		_init_flag = 1;
