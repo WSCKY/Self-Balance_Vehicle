@@ -7,7 +7,8 @@ static PID AnglePID = {0};
 static PID GyrosPID = {0};
 
 static GyrDataDef *pGyr;
- EulerAngle *pEulerAngle;
+static float GyroY = 0.0f;
+static EulerAngle *pEulerAngle;
 
 static void ControllerInit(void)
 {
@@ -15,13 +16,13 @@ static void ControllerInit(void)
 	pEulerAngle = GetAttitudeAngle();
 
 	AnglePID.dt = 0.01f;
-	AnglePID.kp = 160.0f;
-	AnglePID.ki = 20.0f;
-	AnglePID.I_max = 600.0f;
+	AnglePID.kp = 20.0f;
+	AnglePID.ki = 0.4f;
+	AnglePID.I_max = 80.0f;
 	AnglePID.I_sum = 0.0f;
 
 	GyrosPID.dt = 0.005f;
-	GyrosPID.kp = 0.4f;
+	GyrosPID.kp = 1.9f;
 	GyrosPID.ki = 0.0f;
 	GyrosPID.I_max = 0.0f;
 	GyrosPID.I_sum = 0.0f;
@@ -39,8 +40,9 @@ void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable)
 		pid_loop(&AnglePID, ExpAngle, pEulerAngle->pitch);
 	}
 
+	GyroY = GyroY * 0.9f + pGyr->gyrY * 0.1f;
 	if(ControllerTicks % 5 == 0) {
-		pid_loop(&GyrosPID, AnglePID.Output, pGyr->gyrY);
+		pid_loop(&GyrosPID, AnglePID.Output, GyroY);
 	}
 
 	if(ControllerEnable == 0) {
