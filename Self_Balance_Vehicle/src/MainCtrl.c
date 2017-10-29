@@ -1,9 +1,14 @@
 #include "MainCtrl.h"
 
 static uint8_t _init_flag = 0;
+static uint16_t _ctrl_ticks = 0;
+
+static uint8_t RunEnableFlag = 0;
+static uint8_t CmdButtonRleased = 0;
+static uint16_t ButtonConfirmTime = 0;
+static uint16_t ButtonConfirmTimeCnt = 0;
 
 static MPU_RAW *pMPU;
- EulerAngle *pEulerAngle;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
@@ -12,12 +17,14 @@ uint8_t SpeedReadDelay = 0;
 int16_t MotorSpeed_L = 0, MotorSpeed_R = 0;
 float SpeedFilted_L = 0.0f, SpeedFilted_R = 0.0f;
 
+static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
+static float ExpSpeedL = 0, ExpSpeedR = 0;
+
 static uint8_t IMU_StableCheck(void);
 
 void MainCtrlLoopInit(void)
 {
 	pMPU = GetMPU_RawDataPointer();
-	pEulerAngle = GetAttitudeAngle();
 }
 
 void SystemControlTask(void) /* 1ms */
@@ -36,7 +43,6 @@ void SystemControlTask(void) /* 1ms */
 		MotorSpeed_L = ReadEncoderCounter(Encoder_L);
 		MotorSpeed_R = ReadEncoderCounter(Encoder_R);
 	}
-
 	SpeedFilted_L = SpeedFilted_L * 0.9f + MotorSpeed_L * 0.1f;
 	SpeedFilted_R = SpeedFilted_R * 0.9f + MotorSpeed_R * 0.1f;
 
@@ -46,6 +52,40 @@ void SystemControlTask(void) /* 1ms */
 	if(IMU_Stabled) {
 		FusionIMU_6Axis(0.001f);
 	}
+
+	if(BUTTON_PRESSED()) {
+		if(CmdButtonRleased == 1) {
+			if(RunEnableFlag) ButtonConfirmTime = RUN_DISABLE_CONFIRM;
+			else ButtonConfirmTime = RUN_ENABLE_CONFIRM;
+
+			if(ButtonConfirmTimeCnt < ButtonConfirmTime)
+				ButtonConfirmTimeCnt ++;
+			else {
+				RunEnableFlag ^= 1;
+				CmdButtonRleased = 0;
+			}
+		}
+	} else {
+		CmdButtonRleased = 1;
+		ButtonConfirmTime = 0;
+	}
+
+	AttitudeControlLoop(0, RunEnableFlag);
+
+	if(RunEnableFlag == 0) {
+		SetRunningDir(STOP, STOP);
+		SetRunningSpeed(0, 0);
+	} else {
+		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR);
+		if(ExpSpeedL >= 0) ExpDirL = FWD; else ExpDirL = REV;
+		if(ExpSpeedR >= 0) ExpDirR = FWD; else ExpDirR = REV;
+		SetRunningDir(ExpDirL, ExpDirR);
+		SetRunningSpeed((uint16_t)ABS(ExpSpeedL), (uint16_t)ABS(ExpSpeedR));
+	}
+
+	_ctrl_ticks ++;
+	if(_ctrl_ticks >= 60000)
+		_ctrl_ticks = 0;
 }
 //uint16_t tub = 0;
 static uint16_t StableTimeCnt = 0;
