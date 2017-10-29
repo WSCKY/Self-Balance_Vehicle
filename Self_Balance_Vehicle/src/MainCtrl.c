@@ -75,12 +75,14 @@ void SystemControlTask(void) /* 1ms */
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
 		SetRunningSpeed(0, 0);
+		LED_OFF();
 	} else {
 		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR);
 		if(ExpSpeedL >= 0) ExpDirL = FWD; else ExpDirL = REV;
 		if(ExpSpeedR >= 0) ExpDirR = FWD; else ExpDirR = REV;
 		SetRunningDir(ExpDirL, ExpDirR);
 		SetRunningSpeed((uint16_t)ABS(ExpSpeedL), (uint16_t)ABS(ExpSpeedR));
+		LED_ON();
 	}
 
 	_ctrl_ticks ++;
