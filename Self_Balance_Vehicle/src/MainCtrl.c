@@ -9,6 +9,7 @@ static uint16_t ButtonConfirmTime = 0;
 static uint16_t ButtonConfirmTimeCnt = 0;
 
 static MPU_RAW *pMPU;
+static EulerAngle *pEulerAngle;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
@@ -20,6 +21,7 @@ static uint8_t IMU_StableCheck(void);
 void MainCtrlLoopInit(void)
 {
 	pMPU = GetMPU_RawDataPointer();
+	pEulerAngle = GetAttitudeAngle();
 }
 
 void SystemControlTask(void) /* 1ms */
@@ -33,7 +35,7 @@ void SystemControlTask(void) /* 1ms */
 
 	SpeedComputeTask();
 
-//	if(!IMU_Stabled)
+	if(!IMU_Stabled)
 		IMU_StableCheck();
 
 	if(IMU_Stabled) {
@@ -56,6 +58,10 @@ void SystemControlTask(void) /* 1ms */
 		CmdButtonRleased = 1;
 		ButtonConfirmTime = 0;
 		ButtonConfirmTimeCnt = 0;
+	}
+
+	if(ABS(pEulerAngle->pitch) > 45.0f) {
+		RunEnableFlag = 0;
 	}
 
 	AttitudeControlLoop(-1.5f, RunEnableFlag);
