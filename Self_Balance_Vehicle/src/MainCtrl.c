@@ -10,6 +10,7 @@ static GyrRawDef GyrOffset = {0, 0, 0};
 #define SpeedReadDiv         (10)
 uint8_t SpeedReadDelay = 0;
 int16_t MotorSpeed_L = 0, MotorSpeed_R = 0;
+float SpeedFilted_L = 0.0f, SpeedFilted_R = 0.0f;
 
 static uint8_t IMU_StableCheck(void);
 
@@ -35,6 +36,9 @@ void SystemControlTask(void) /* 1ms */
 		MotorSpeed_L = ReadEncoderCounter(Encoder_L);
 		MotorSpeed_R = ReadEncoderCounter(Encoder_R);
 	}
+
+	SpeedFilted_L = SpeedFilted_L * 0.9f + MotorSpeed_L * 0.1f;
+	SpeedFilted_R = SpeedFilted_R * 0.9f + MotorSpeed_R * 0.1f;
 
 //	if(!IMU_Stabled)
 		IMU_StableCheck();
