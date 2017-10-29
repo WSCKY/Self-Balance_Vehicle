@@ -19,7 +19,7 @@ int16_t ReadEncoderCounter(EncoderID_Def id)
 		cnt = (int16_t)ENCODER_B_TIM->CNT;
 		ENCODER_B_TIM->CNT = 0;
 	} else {
-		cnt = (int16_t)ENCODER_A_TIM->CNT;
+		cnt = -(int16_t)ENCODER_A_TIM->CNT;
 		ENCODER_A_TIM->CNT = 0;
 	}
 	return cnt;
