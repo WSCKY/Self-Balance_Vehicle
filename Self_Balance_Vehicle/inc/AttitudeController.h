@@ -4,7 +4,7 @@
 #include "pidController.h"
 #include "AttitudeEstimator.h"
 
-void AttitudeControlLoop(uint8_t ExpAngle, uint8_t ControllerEnable);
+void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable);
 void GetAttitudeControllerOutput(float *Left, float *Right);
 
 #endif /* __ATTITUDECONTROLLER_H */
