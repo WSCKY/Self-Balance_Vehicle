@@ -12,11 +12,6 @@ static MPU_RAW *pMPU;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
-#define SpeedReadDiv         (10)
-uint8_t SpeedReadDelay = 0;
-int16_t MotorSpeed_L = 0, MotorSpeed_R = 0;
-float SpeedFilted_L = 0.0f, SpeedFilted_R = 0.0f;
-
 static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
 static float ExpSpeedL = 0, ExpSpeedR = 0;
 
@@ -36,15 +31,7 @@ void SystemControlTask(void) /* 1ms */
 	}
 	MPU6500_Read(&GyrOffset, IMU_Stabled);
 
-	/* Read Per (SpeedReadDiv)ms */
-	SpeedReadDelay ++;
-	if(SpeedReadDelay >= SpeedReadDiv) {
-		SpeedReadDelay = 0;
-		MotorSpeed_L = ReadEncoderCounter(Encoder_L);
-		MotorSpeed_R = ReadEncoderCounter(Encoder_R);
-	}
-	SpeedFilted_L = SpeedFilted_L * 0.9f + MotorSpeed_L * 0.1f;
-	SpeedFilted_R = SpeedFilted_R * 0.9f + MotorSpeed_R * 0.1f;
+	SpeedComputeTask();
 
 //	if(!IMU_Stabled)
 		IMU_StableCheck();
