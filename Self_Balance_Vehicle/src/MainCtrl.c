@@ -55,6 +55,7 @@ void SystemControlTask(void) /* 1ms */
 	} else {
 		CmdButtonRleased = 1;
 		ButtonConfirmTime = 0;
+		ButtonConfirmTimeCnt = 0;
 	}
 
 	AttitudeControlLoop(0, RunEnableFlag);
