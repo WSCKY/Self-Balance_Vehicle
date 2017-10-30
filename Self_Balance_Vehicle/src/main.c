@@ -37,6 +37,7 @@ int main(void)
 	DebugPortInit();
 	MotorDriverInit();
 	EncoderDriverInit();
+	RemoteControlInit();
 
 	EstimatorInit();
 	SysTimerInit();
