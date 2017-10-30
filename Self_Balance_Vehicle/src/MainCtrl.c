@@ -13,6 +13,10 @@ static EulerAngle *pEulerAngle;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
+static RC_CHANNLE_t *pRC;
+static uint8_t SignalLostFlag = 1;
+static uint32_t SignalLostCnt = 0;
+
 static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
 static float ExpSpeedL = 0, ExpSpeedR = 0;
 
@@ -22,6 +26,8 @@ void MainCtrlLoopInit(void)
 {
 	pMPU = GetMPU_RawDataPointer();
 	pEulerAngle = GetAttitudeAngle();
+
+	pRC = GetRC_ChannelData();
 }
 
 void SystemControlTask(void) /* 1ms */
@@ -42,6 +48,17 @@ void SystemControlTask(void) /* 1ms */
 		FusionIMU_6Axis(0.001f);
 	}
 
+	if(GetRCUpdateFlag()) {
+		SignalLostCnt = 0;
+		RC_ParseData();
+	} else {
+		if(SignalLostCnt < 1000)
+			SignalLostCnt ++;
+		else {
+			SignalLostFlag = 1;
+		}
+	}
+
 	if(BUTTON_PRESSED()) {
 		if(CmdButtonRleased == 1) {
 			if(RunEnableFlag) ButtonConfirmTime = RUN_DISABLE_CONFIRM;
@@ -60,7 +77,9 @@ void SystemControlTask(void) /* 1ms */
 		ButtonConfirmTimeCnt = 0;
 	}
 
-	if(ABS(pEulerAngle->pitch) > 45.0f) {
+	if(ABS(pEulerAngle->pitch) > 45.0f || \
+		SignalLostFlag == 1 || \
+		IMU_Stabled == 0) {
 		RunEnableFlag = 0;
 	}
 
