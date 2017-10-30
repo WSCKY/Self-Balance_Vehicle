@@ -11,6 +11,7 @@
 #include "Encoder.h"
 #include "SysTimer.h"
 #include "TB6612FNG.h"
+#include "RemoteController.h"
 
 #include "MainCtrl.h"
 #include "DataMonitor.h"
