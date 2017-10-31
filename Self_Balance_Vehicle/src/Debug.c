@@ -96,8 +96,8 @@ static void dma_config(void)
 
 	/* Enable the DEBUG_USART_Tx_DMA_IRQn Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = DEBUG_USART_Tx_DMA_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
