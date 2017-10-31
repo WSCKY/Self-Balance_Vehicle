@@ -21,11 +21,6 @@ void RemoteControlInit(void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_Init(RC_USART_GPIO, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = RC_USART_TxPin;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(RC_USART_GPIO, &GPIO_InitStructure);
-
 	usart_config();
 }
 
@@ -52,7 +47,7 @@ static void usart_config(void)
   USART_InitStructure.USART_StopBits = USART_StopBits_2;
   USART_InitStructure.USART_Parity = USART_Parity_Even;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  USART_InitStructure.USART_Mode = USART_Mode_Rx;
   /* Configure RC_USART */
   USART_Init(RC_USART, &USART_InitStructure);
 
@@ -103,14 +98,12 @@ void RC_ParseData(void)
 	RC_ChannelData.Channel[14] = ((RC_Data.rf_data.data8[19] >> 2 | RC_Data.rf_data.data8[20] << 6) & 0x07FF);
 	RC_ChannelData.Channel[15] = ((RC_Data.rf_data.data8[20] >> 5 | RC_Data.rf_data.data8[21] << 3) & 0x07FF);
 }
-//uint8_t DebugBuffer[50] = {0};
+
 static uint8_t _data_step = 0;
 static uint8_t _rx_data_cnt = 0;
 static RC_DATA_t _rc_data = {0};
 static void _rc_data_decode(uint8_t data)
 {
-//	DebugBuffer[_rx_data_cnt ++] = data;
-//	if(_rx_data_cnt >= 50) _rx_data_cnt = 0;
 	switch(_data_step) {
 		case 0: {
 			if(data == 0x0F) {
@@ -146,8 +139,8 @@ static void _rc_data_decode(uint8_t data)
 void RC_USART_IRQHandler(void)
 {
 	if(SET == USART_GetITStatus(RC_USART, USART_IT_RXNE)) {
-		USART_ClearFlag(RC_USART, USART_FLAG_RXNE);
-		USART_GetFlagStatus(RC_USART, USART_FLAG_ORE);
 		_rc_data_decode(USART_ReceiveData(RC_USART));
+		USART_ClearFlag(RC_USART, USART_FLAG_RXNE);
+		USART_ClearITPendingBit(RC_USART, USART_IT_RXNE);
 	}
 }
