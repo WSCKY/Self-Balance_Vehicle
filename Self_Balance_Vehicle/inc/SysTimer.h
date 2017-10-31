@@ -1,6 +1,7 @@
 #ifndef __SYSTIMER_H
 #define __SYSTIMER_H
 
+#include "SysConfig.h"
 #include "stm32f10x_tim.h"
 
 #define SYS_TIMER            TIM3
