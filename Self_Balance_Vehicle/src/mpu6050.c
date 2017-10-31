@@ -60,34 +60,35 @@ void MPU6050_Init(void)
  */
 void MPU6500_Read(GyrRawDef *Offset, uint8_t IsOffset)
 {
-	I2C_ReadDataBufferDMA_IT(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14);
-	/* Reorganize received data */
-	((uint8_t *)&mpu_data.accX)[1] = mpu_rx_buffer[0];
-	((uint8_t *)&mpu_data.accX)[0] = mpu_rx_buffer[1];
-	((uint8_t *)&mpu_data.accY)[1] = mpu_rx_buffer[2];
-	((uint8_t *)&mpu_data.accY)[0] = mpu_rx_buffer[3];
-	((uint8_t *)&mpu_data.accZ)[1] = mpu_rx_buffer[4];
-	((uint8_t *)&mpu_data.accZ)[0] = mpu_rx_buffer[5];
-	((uint8_t *)&mpu_data.temp)[1] = mpu_rx_buffer[6];
-	((uint8_t *)&mpu_data.temp)[0] = mpu_rx_buffer[7];
-	((uint8_t *)&mpu_data.gyrX)[1] = mpu_rx_buffer[8];
-	((uint8_t *)&mpu_data.gyrX)[0] = mpu_rx_buffer[9];
-	((uint8_t *)&mpu_data.gyrY)[1] = mpu_rx_buffer[10];
-	((uint8_t *)&mpu_data.gyrY)[0] = mpu_rx_buffer[11];
-	((uint8_t *)&mpu_data.gyrZ)[1] = mpu_rx_buffer[12];
-	((uint8_t *)&mpu_data.gyrZ)[0] = mpu_rx_buffer[13];
-	accVal.accX = mpu_data.accX * 0.002392578125f;
-	accVal.accY = mpu_data.accY * 0.002392578125f;
-	accVal.accZ = mpu_data.accZ * 0.002392578125f;
-	temperature = (mpu_data.temp / 340.0f) + 36.53f;
-	if(IsOffset) {
-		gyrVal.gyrX = (mpu_data.gyrX - Offset->gyrX) * 0.06103515625f;
-		gyrVal.gyrY = (mpu_data.gyrY - Offset->gyrY) * 0.06103515625f;
-		gyrVal.gyrZ = (mpu_data.gyrZ - Offset->gyrZ) * 0.06103515625f;
-	} else {
-		gyrVal.gyrX = mpu_data.gyrX * 0.06103515625f;
-		gyrVal.gyrY = mpu_data.gyrY * 0.06103515625f;
-		gyrVal.gyrZ = mpu_data.gyrZ * 0.06103515625f;
+	if(I2C_ReadDataBufferDMA_IT(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14) == 0) {
+		/* Reorganize received data */
+		((uint8_t *)&mpu_data.accX)[1] = mpu_rx_buffer[0];
+		((uint8_t *)&mpu_data.accX)[0] = mpu_rx_buffer[1];
+		((uint8_t *)&mpu_data.accY)[1] = mpu_rx_buffer[2];
+		((uint8_t *)&mpu_data.accY)[0] = mpu_rx_buffer[3];
+		((uint8_t *)&mpu_data.accZ)[1] = mpu_rx_buffer[4];
+		((uint8_t *)&mpu_data.accZ)[0] = mpu_rx_buffer[5];
+		((uint8_t *)&mpu_data.temp)[1] = mpu_rx_buffer[6];
+		((uint8_t *)&mpu_data.temp)[0] = mpu_rx_buffer[7];
+		((uint8_t *)&mpu_data.gyrX)[1] = mpu_rx_buffer[8];
+		((uint8_t *)&mpu_data.gyrX)[0] = mpu_rx_buffer[9];
+		((uint8_t *)&mpu_data.gyrY)[1] = mpu_rx_buffer[10];
+		((uint8_t *)&mpu_data.gyrY)[0] = mpu_rx_buffer[11];
+		((uint8_t *)&mpu_data.gyrZ)[1] = mpu_rx_buffer[12];
+		((uint8_t *)&mpu_data.gyrZ)[0] = mpu_rx_buffer[13];
+		accVal.accX = mpu_data.accX * 0.002392578125f;
+		accVal.accY = mpu_data.accY * 0.002392578125f;
+		accVal.accZ = mpu_data.accZ * 0.002392578125f;
+		temperature = (mpu_data.temp / 340.0f) + 36.53f;
+		if(IsOffset) {
+			gyrVal.gyrX = (mpu_data.gyrX - Offset->gyrX) * 0.06103515625f;
+			gyrVal.gyrY = (mpu_data.gyrY - Offset->gyrY) * 0.06103515625f;
+			gyrVal.gyrZ = (mpu_data.gyrZ - Offset->gyrZ) * 0.06103515625f;
+		} else {
+			gyrVal.gyrX = mpu_data.gyrX * 0.06103515625f;
+			gyrVal.gyrY = mpu_data.gyrY * 0.06103515625f;
+			gyrVal.gyrZ = mpu_data.gyrZ * 0.06103515625f;
+		}
 	}
 }
 
