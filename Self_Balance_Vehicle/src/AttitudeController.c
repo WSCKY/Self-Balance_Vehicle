@@ -15,13 +15,13 @@ static void ControllerInit(void)
 	pGyr = GetGyrDataPointer();
 	pEulerAngle = GetAttitudeAngle();
 
-	AnglePID.dt = 0.01f;
+	AnglePID.dt = (float)ANGLE_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
 	AnglePID.kp = 20.0f;
 	AnglePID.ki = 0.4f;
 	AnglePID.I_max = 80.0f;
 	AnglePID.I_sum = 0.0f;
 
-	GyrosPID.dt = 0.005f;
+	GyrosPID.dt = (float)GYROS_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
 	GyrosPID.kp = 1.9f;
 	GyrosPID.ki = 0.0f;
 	GyrosPID.I_max = 0.0f;
@@ -36,14 +36,14 @@ void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable)
 		ControllerInit();
 	}
 
-	if(ControllerTicks % 2 == 0) {
+	if(ControllerTicks % ANGLE_CTRL_RATE_DIV == 0) {
 		pid_loop(&AnglePID, ExpAngle, pEulerAngle->pitch);
 	}
 
 	GyroY = GyroY * 0.7f + pGyr->gyrY * 0.3f;
-//	if(ControllerTicks % 5 == 0) {
+	if(ControllerTicks % GYROS_CTRL_RATE_DIV == 0) {
 		pid_loop(&GyrosPID, AnglePID.Output, GyroY);
-//	}
+	}
 
 	if(ControllerEnable == 0) {
 		GyrosPID.I_sum = 0;
