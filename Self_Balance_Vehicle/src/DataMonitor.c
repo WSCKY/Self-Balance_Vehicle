@@ -22,9 +22,7 @@ void DataPackageChkSum(COMM_DATA *pComData)
 		chk += pComData->data[i / 4].c_data[i % 4];
 	pComData->checksum = chk;
 }
-//extern uint16_t tub;
-extern int16_t MotorSpeed_L, MotorSpeed_R;
-extern float SpeedFilted_L, SpeedFilted_R;
+
 void SendDataToMonitor(void)
 {
 	if(_init_flag == 0) {
@@ -38,15 +36,15 @@ void SendDataToMonitor(void)
 		return;
 	}
 
-	ComDataBuf.ComData.data[0].f_data = MotorSpeed_L;//pAcc->accX;//
-	ComDataBuf.ComData.data[1].f_data = MotorSpeed_R;//pAcc->accY;//
-	ComDataBuf.ComData.data[2].f_data = SpeedFilted_L;//pAcc->accZ;//
-	ComDataBuf.ComData.data[3].f_data = SpeedFilted_R;//pGyr->gyrX;//
+	ComDataBuf.ComData.data[0].f_data = pAcc->accX;
+	ComDataBuf.ComData.data[1].f_data = pAcc->accY;
+	ComDataBuf.ComData.data[2].f_data = pAcc->accZ;
+	ComDataBuf.ComData.data[3].f_data = pGyr->gyrX;
 	ComDataBuf.ComData.data[4].f_data = pGyr->gyrY;
 	ComDataBuf.ComData.data[5].f_data = pGyr->gyrZ;
 	ComDataBuf.ComData.data[6].f_data = pEulerAngle->pitch;
 	ComDataBuf.ComData.data[7].f_data = pEulerAngle->roll;
-	ComDataBuf.ComData.data[8].f_data = pEulerAngle->yaw;//tub;//
+	ComDataBuf.ComData.data[8].f_data = pEulerAngle->yaw;
 	DataPackageChkSum(&ComDataBuf.ComData);
 
 	DebugPortSendBytesDMA(ComDataBuf.RawData, 40);
