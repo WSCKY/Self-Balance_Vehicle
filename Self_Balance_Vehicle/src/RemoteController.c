@@ -59,7 +59,7 @@ static void usart_config(void)
 	/* Enable the RC_USART Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = RC_USART_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
@@ -103,12 +103,14 @@ void RC_ParseData(void)
 	RC_ChannelData.Channel[14] = ((RC_Data.rf_data.data8[19] >> 2 | RC_Data.rf_data.data8[20] << 6) & 0x07FF);
 	RC_ChannelData.Channel[15] = ((RC_Data.rf_data.data8[20] >> 5 | RC_Data.rf_data.data8[21] << 3) & 0x07FF);
 }
-
+//uint8_t DebugBuffer[50] = {0};
 static uint8_t _data_step = 0;
 static uint8_t _rx_data_cnt = 0;
 static RC_DATA_t _rc_data = {0};
 static void _rc_data_decode(uint8_t data)
 {
+//	DebugBuffer[_rx_data_cnt ++] = data;
+//	if(_rx_data_cnt >= 50) _rx_data_cnt = 0;
 	switch(_data_step) {
 		case 0: {
 			if(data == 0x0F) {

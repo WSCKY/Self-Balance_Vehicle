@@ -4,7 +4,7 @@
 #include "Encoder.h"
 #include "pidController.h"
 
-#define SpeedReadDiv                   (10)
+#define SpeedReadDiv                   (2)
 
 void SpeedComputeTask(void);
 void SpeedControlLoop(float ExpVel, uint8_t ControllerEnable);

@@ -36,14 +36,14 @@ void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable)
 		ControllerInit();
 	}
 
-	if(ControllerTicks % 10 == 0) {
+	if(ControllerTicks % 2 == 0) {
 		pid_loop(&AnglePID, ExpAngle, pEulerAngle->pitch);
 	}
 
-	GyroY = GyroY * 0.9f + pGyr->gyrY * 0.1f;
-	if(ControllerTicks % 5 == 0) {
+	GyroY = GyroY * 0.7f + pGyr->gyrY * 0.3f;
+//	if(ControllerTicks % 5 == 0) {
 		pid_loop(&GyrosPID, AnglePID.Output, GyroY);
-	}
+//	}
 
 	if(ControllerEnable == 0) {
 		GyrosPID.I_sum = 0;

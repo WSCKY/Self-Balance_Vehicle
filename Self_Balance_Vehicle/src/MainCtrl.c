@@ -29,8 +29,8 @@ void MainCtrlLoopInit(void)
 
 	pRC = GetRC_ChannelData();
 }
-
-void SystemControlTask(void) /* 1ms */
+float exp_vel = 0;
+void SystemControlTask(void) /* 5ms */
 {
 	if(_init_flag == 0) {
 		_init_flag = 1;
@@ -45,14 +45,15 @@ void SystemControlTask(void) /* 1ms */
 		IMU_StableCheck();
 
 	if(IMU_Stabled) {
-		FusionIMU_6Axis(0.001f);
+		FusionIMU_6Axis(0.005f);
 	}
 
 	if(GetRCUpdateFlag()) {
 		SignalLostCnt = 0;
+		SignalLostFlag = 0;
 		RC_ParseData();
 	} else {
-		if(SignalLostCnt < 1000)
+		if(SignalLostCnt < 200)
 			SignalLostCnt ++;
 		else {
 			SignalLostFlag = 1;
@@ -78,13 +79,16 @@ void SystemControlTask(void) /* 1ms */
 	}
 
 	if(ABS(pEulerAngle->pitch) > 45.0f || \
-		SignalLostFlag == 1 || \
-		IMU_Stabled == 0) {
+		IMU_Stabled == 0) {//		SignalLostFlag == 1 || 
 		RunEnableFlag = 0;
 	}
 
 	AttitudeControlLoop(-1.8f, RunEnableFlag);
-	SpeedControlLoop(0, RunEnableFlag);
+	if(SignalLostFlag)
+		exp_vel = 0;
+	else
+		exp_vel = ((1024 - pRC->Channel[1]) * 2 / 35.0f);
+	SpeedControlLoop(exp_vel, RunEnableFlag);
 
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
@@ -116,7 +120,7 @@ static uint8_t IMU_StableCheck(void)
 	uint8_t ret = 0;
 //	tub = (ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz));
 	if((ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz)) < 5) {
-		if(StableTimeCnt < 1000)
+		if(StableTimeCnt < 200)
 			StableTimeCnt ++;
 		else {
 			GyrOffset.gyrX = pMPU->gyrX;

@@ -13,7 +13,7 @@
 
 #define ABS(x) ((x) >= 0 ? (x) : -(x))
 
-#define RUN_ENABLE_CONFIRM             1000
-#define RUN_DISABLE_CONFIRM            100
+#define RUN_ENABLE_CONFIRM             200
+#define RUN_DISABLE_CONFIRM            20
 
 #endif /* __MAINCTRL_H */

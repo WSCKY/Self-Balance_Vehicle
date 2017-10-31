@@ -9,15 +9,15 @@ float SpeedFilted_L = 0.0f, SpeedFilted_R = 0.0f;
 
 void SpeedComputeTask(void)
 {
-	/* Read Per (SpeedReadDiv)ms */
+	/* Read Per (SpeedReadDiv * 5)ms */
 	SpeedReadDelay ++;
 	if(SpeedReadDelay >= SpeedReadDiv) {
 		SpeedReadDelay = 0;
 		MotorSpeed_L = ReadEncoderCounter(Encoder_L);
 		MotorSpeed_R = ReadEncoderCounter(Encoder_R);
 	}
-	SpeedFilted_L = SpeedFilted_L * 0.9f + MotorSpeed_L * 0.1f;
-	SpeedFilted_R = SpeedFilted_R * 0.9f + MotorSpeed_R * 0.1f;
+	SpeedFilted_L = SpeedFilted_L * 0.7f + MotorSpeed_L * 0.3f;
+	SpeedFilted_R = SpeedFilted_R * 0.7f + MotorSpeed_R * 0.3f;
 }
 
 static PID SpeedPID = {0};
@@ -39,7 +39,7 @@ void SpeedControlLoop(float ExpVel, uint8_t ControllerEnable)
 		ControllerInit();
 	}
 
-	if(ControllerTicks % 10 == 0) {
+	if(ControllerTicks % 2 == 0) {
 		pid_loop(&SpeedPID, ExpVel, (SpeedFilted_L + SpeedFilted_R));
 	}
 

@@ -45,7 +45,7 @@ void MPU6050_Init(void)
 	/* Configure the MPU6050_I2C_DMA_Rx_Channel Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = MPU6050_I2C_Rx_DMA_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 

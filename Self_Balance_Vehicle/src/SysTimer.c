@@ -12,7 +12,7 @@ void SysTimerInit(void)
   RCC_APB1PeriphClockCmd(SYS_TIMER_CLK, ENABLE);
 
 	/* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = 7999;
+  TIM_TimeBaseStructure.TIM_Period = 39999; /* 200Hz */
   TIM_TimeBaseStructure.TIM_Prescaler = 8;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -21,7 +21,7 @@ void SysTimerInit(void)
 	/* Enable the SYS_TIMER Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = SYS_TIMER_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
