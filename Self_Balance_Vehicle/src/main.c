@@ -31,6 +31,7 @@
   */
 int main(void)
 {
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 	LED_Init();
 	DelayInit();
 	MPU6050_Init();
