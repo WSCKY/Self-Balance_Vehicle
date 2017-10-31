@@ -2,6 +2,7 @@
 
 static uint8_t _init_flag = 0;
 static uint16_t _ctrl_ticks = 0;
+static float MainCtrlLoopDt = 0.0f;
 
 static uint8_t RunEnableFlag = 0;
 static uint8_t CmdButtonRleased = 0;
@@ -24,13 +25,14 @@ static uint8_t IMU_StableCheck(void);
 
 void MainCtrlLoopInit(void)
 {
+	MainCtrlLoopDt = 1.0f / SYSTEM_LOOP_RATE;
 	pMPU = GetMPU_RawDataPointer();
 	pEulerAngle = GetAttitudeAngle();
 
 	pRC = GetRC_ChannelData();
 }
 float exp_vel = 0;
-void SystemControlTask(void) /* 5ms */
+void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 {
 	if(_init_flag == 0) {
 		_init_flag = 1;
@@ -45,7 +47,7 @@ void SystemControlTask(void) /* 5ms */
 		IMU_StableCheck();
 
 	if(IMU_Stabled) {
-		FusionIMU_6Axis(0.005f);
+		FusionIMU_6Axis(MainCtrlLoopDt);
 	}
 
 	if(GetRCUpdateFlag()) {
@@ -79,7 +81,7 @@ void SystemControlTask(void) /* 5ms */
 	}
 
 	if(ABS(pEulerAngle->pitch) > 45.0f || \
-		IMU_Stabled == 0) {//		SignalLostFlag == 1 || 
+		IMU_Stabled == 0) {
 		RunEnableFlag = 0;
 	}
 
@@ -109,7 +111,7 @@ void SystemControlTask(void) /* 5ms */
 	if(_ctrl_ticks >= 60000)
 		_ctrl_ticks = 0;
 }
-//uint16_t tub = 0;
+
 static uint16_t StableTimeCnt = 0;
 static int16_t old_gx = 0, old_gy = 0, old_gz = 0;
 /*
@@ -118,7 +120,6 @@ static int16_t old_gx = 0, old_gy = 0, old_gz = 0;
 static uint8_t IMU_StableCheck(void)
 {
 	uint8_t ret = 0;
-//	tub = (ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz));
 	if((ABS(pMPU->gyrX - old_gx) + ABS(pMPU->gyrY - old_gy) + ABS(pMPU->gyrZ - old_gz)) < 5) {
 		if(StableTimeCnt < 200)
 			StableTimeCnt ++;
