@@ -60,7 +60,7 @@ static void EncoderA_Init(void)
 
 	/* Enable the Encoder Timer Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = ENCODER_A_TIM_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x2;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -107,7 +107,7 @@ static void EncoderB_Init(void)
 
 	/* Enable the Encoder Timer Interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = ENCODER_B_TIM_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x1;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x2;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
