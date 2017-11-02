@@ -18,6 +18,10 @@ static RC_CHANNLE_t *pRC;
 static uint8_t SignalLostFlag = 1;
 static uint32_t SignalLostCnt = 0;
 
+static float TOF_Distance = 0.0f;
+static uint8_t TOF_SignalLostFlag = 1;
+static uint32_t TOF_SignalLostCnt = 0;
+
 static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
 static float ExpSpeedL = 0, ExpSpeedR = 0;
 
@@ -62,6 +66,17 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		}
 	}
 
+	if(GetNewTOFData(&TOF_Distance)) {
+		TOF_SignalLostCnt = 0;
+		TOF_SignalLostFlag = 0;
+	} else {
+		if(TOF_SignalLostCnt < 200)
+			TOF_SignalLostCnt ++;
+		else {
+			TOF_SignalLostFlag = 1;
+		}
+	}
+
 	if(BUTTON_PRESSED()) {
 		if(CmdButtonRleased == 1) {
 			if(RunEnableFlag) ButtonConfirmTime = RUN_DISABLE_CONFIRM;
@@ -92,6 +107,15 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		exp_vel = ((1024 - pRC->Channel[1]) * 2 / 35.0f);
 		exp_yaw = ((1024 - pRC->Channel[0]) * 8 / 35.0f);
 	}
+
+	if(TOF_SignalLostFlag == 0) {
+		if(TOF_Distance <= 45.0f && exp_vel > 0) {
+			exp_vel = -20.0f;
+		} else if(TOF_Distance <= 60.0f && exp_vel > 0) {
+			exp_vel = 0.0f;
+		}
+	}
+
 	SpeedControlLoop(exp_vel, RunEnableFlag);
 	YawControlLoop(exp_yaw, RunEnableFlag);
 
