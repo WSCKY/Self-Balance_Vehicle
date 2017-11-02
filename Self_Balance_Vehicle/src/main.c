@@ -15,12 +15,10 @@
 /* Private define -----------------------------------------------------------*/
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
-//TURN_DIR dirL = STOP, dirR = STOP;
-//uint16_t speedL = 0, speedR = 0;
-//uint8_t BeepStart = 0;
-//TURN_DIR dir = STOP;
-//uint16_t sound = 0;
-//uint16_t freq = 500;
+static uint16_t DelayTicksCnt = 0;
+
+static uint16_t LEDFlashDelay = 0;
+static uint16_t DebugDataSendDelay = 0;
 /* Private function prototypes ----------------------------------------------*/
 /* Private functions --------------------------------------------------------*/
 
@@ -43,30 +41,38 @@ int main(void)
 	EstimatorInit();
 	SysTimerInit();
 
+	LEDFlashDelay = 1000 / LED_FLASH_RATE_WAIT_STABLE;
+	DebugDataSendDelay = 1000 / DEBUG_DATA_FRAME_RATE;
   /* Infinite loop */
   while (1)
   {
-		SendDataToMonitor();
-		Delay(5);
-//		if(BUTTON_PRESSED()) {
-//			LED_ON();
-//		} else {
-//			LED_OFF();
-//		}
+		if(DelayTicksCnt % DebugDataSendDelay == 0) {
+			SendDataToMonitor();
+		}
 
-//		LED_TOG();
-//		Delay(200);
-//		SetRunningDir(dirL, dirR);
-//		SetRunningSpeed(speedL, speedR);
+		if(!IMU_GotOffset()) {
+			LEDFlashDelay = 1000 / LED_FLASH_RATE_WAIT_STABLE;
+		} else if(GetSignalLostFlag()) {
+			LEDFlashDelay = 1000 / LED_FLASH_RATE_SIGNAL_LOST;
+		} else {
+			LEDFlashDelay = 0;
+		}
 
-//		if(BeepStart) {
-//			SetRunningDir(FWD, FWD);
-//			SetRunningSpeed(sound, sound);
-//			Delay(freq);
-//			SetRunningDir(REV, REV);
-//			SetRunningSpeed(sound, sound);
-//			Delay(freq);
-//		}
+		if(LEDFlashDelay != 0) {
+			if(DelayTicksCnt % LEDFlashDelay == 0)
+				LED_TOG();
+		} else {
+			if(GetVehicleRunState()) {
+				LED_ON();
+			} else {
+				LED_OFF();
+			}
+		}
+
+		Delay(1);
+		DelayTicksCnt ++;
+		if(DelayTicksCnt >= 60000)
+			DelayTicksCnt = 0;
   }
 }
 
