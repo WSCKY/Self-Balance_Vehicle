@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 
 #include "LED.h"
+#include "TOF.h"
 #include "Delay.h"
 #include "Debug.h"
 #include "Button.h"
