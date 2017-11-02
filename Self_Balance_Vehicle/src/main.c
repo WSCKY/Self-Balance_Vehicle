@@ -33,6 +33,7 @@ int main(void)
 	LED_Init();
 	DelayInit();
 	MPU6050_Init();
+	TOFDriverInit();
 	DebugPortInit();
 	MotorDriverInit();
 	EncoderDriverInit();
