@@ -8,6 +8,7 @@
 #include "Encoder.h"
 #include "TB6612FNG.h"
 #include "pidController.h"
+#include "YawController.h"
 #include "SpeedController.h"
 #include "RemoteController.h"
 #include "AttitudeEstimator.h"

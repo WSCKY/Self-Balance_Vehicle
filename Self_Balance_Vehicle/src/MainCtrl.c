@@ -31,7 +31,7 @@ void MainCtrlLoopInit(void)
 
 	pRC = GetRC_ChannelData();
 }
-float exp_vel = 0;
+float exp_vel = 0, exp_yaw = 0;
 void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 {
 	if(_init_flag == 0) {
@@ -86,20 +86,25 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 	}
 
 	AttitudeControlLoop(-1.8f, RunEnableFlag);
-	if(SignalLostFlag)
-		exp_vel = 0;
-	else
+	if(SignalLostFlag) {
+		exp_vel = 0; exp_yaw = 0;
+	} else {
 		exp_vel = ((1024 - pRC->Channel[1]) * 2 / 35.0f);
+		exp_yaw = ((1024 - pRC->Channel[0]) * 4 / 35.0f);
+	}
 	SpeedControlLoop(exp_vel, RunEnableFlag);
+	YawControlLoop(exp_yaw, RunEnableFlag);
 
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
 		SetRunningSpeed(0, 0);
 		LED_OFF();
 	} else {
-		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR);
-		ExpSpeedL += GetSpeedControllerOutput();
+		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR); // apply attitude control.
+		ExpSpeedL += GetSpeedControllerOutput(); // apply speed control.
 		ExpSpeedR += GetSpeedControllerOutput();
+		ExpSpeedL -= GetYawControllerOutput(); // apply yaw control.
+		ExpSpeedR += GetYawControllerOutput();
 		if(ExpSpeedL >= 0) ExpDirL = FWD; else ExpDirL = REV;
 		if(ExpSpeedR >= 0) ExpDirR = FWD; else ExpDirR = REV;
 		SetRunningDir(ExpDirL, ExpDirR);
