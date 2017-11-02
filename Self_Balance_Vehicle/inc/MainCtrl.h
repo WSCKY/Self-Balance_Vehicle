@@ -3,7 +3,6 @@
 
 #include "SysConfig.h"
 
-#include "LED.h"
 #include "Button.h"
 #include "Encoder.h"
 #include "TB6612FNG.h"
@@ -18,5 +17,9 @@
 
 #define RUN_ENABLE_CONFIRM             200
 #define RUN_DISABLE_CONFIRM            20
+
+uint8_t IMU_GotOffset(void);
+uint8_t GetSignalLostFlag(void);
+uint8_t GetVehicleRunState(void);
 
 #endif /* __MAINCTRL_H */

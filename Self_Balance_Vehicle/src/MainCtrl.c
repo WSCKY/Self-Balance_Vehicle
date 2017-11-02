@@ -98,7 +98,6 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
 		SetRunningSpeed(0, 0);
-		LED_OFF();
 	} else {
 		GetAttitudeControllerOutput(&ExpSpeedL, &ExpSpeedR); // apply attitude control.
 		ExpSpeedL += GetSpeedControllerOutput(); // apply speed control.
@@ -109,7 +108,6 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		if(ExpSpeedR >= 0) ExpDirR = FWD; else ExpDirR = REV;
 		SetRunningDir(ExpDirL, ExpDirR);
 		SetRunningSpeed((uint16_t)ABS(ExpSpeedL), (uint16_t)ABS(ExpSpeedR));
-		LED_ON();
 	}
 
 	_ctrl_ticks ++;
@@ -140,4 +138,19 @@ static uint8_t IMU_StableCheck(void)
 	}
 	old_gx = pMPU->gyrX; old_gy = pMPU->gyrY; old_gz = pMPU->gyrZ;
 	return ret;
+}
+
+uint8_t IMU_GotOffset(void)
+{
+	return IMU_Stabled;
+}
+
+uint8_t GetSignalLostFlag(void)
+{
+	return SignalLostFlag;
+}
+
+uint8_t GetVehicleRunState(void)
+{
+	return RunEnableFlag;
 }
