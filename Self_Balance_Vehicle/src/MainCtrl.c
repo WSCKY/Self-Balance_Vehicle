@@ -80,7 +80,7 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		ButtonConfirmTimeCnt = 0;
 	}
 
-	if(ABS(pEulerAngle->pitch) > 45.0f || \
+	if(ABS(pEulerAngle->pitch) > 50.0f || \
 		IMU_Stabled == 0) {
 		RunEnableFlag = 0;
 	}
@@ -90,7 +90,7 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		exp_vel = 0; exp_yaw = 0;
 	} else {
 		exp_vel = ((1024 - pRC->Channel[1]) * 2 / 35.0f);
-		exp_yaw = ((1024 - pRC->Channel[0]) * 4 / 35.0f);
+		exp_yaw = ((1024 - pRC->Channel[0]) * 8 / 35.0f);
 	}
 	SpeedControlLoop(exp_vel, RunEnableFlag);
 	YawControlLoop(exp_yaw, RunEnableFlag);
