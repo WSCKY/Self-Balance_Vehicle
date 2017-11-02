@@ -17,14 +17,14 @@ static void ControllerInit(void)
 
 	AnglePID.dt = (float)ANGLE_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
 	AnglePID.kp = 20.0f;
-	AnglePID.ki = 0.4f;
-	AnglePID.I_max = 80.0f;
+	AnglePID.ki = 0.0f;
+	AnglePID.I_max = 0.0f;
 	AnglePID.I_sum = 0.0f;
 
 	GyrosPID.dt = (float)GYROS_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
-	GyrosPID.kp = 1.9f;
+	GyrosPID.kp = 1.0f;
 	GyrosPID.ki = 0.0f;
-	GyrosPID.I_max = 0.0f;
+	GyrosPID.I_max = 100.0f;
 	GyrosPID.I_sum = 0.0f;
 }
 
