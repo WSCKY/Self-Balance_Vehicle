@@ -3,6 +3,7 @@
 
 #include "SysConfig.h"
 
+#include "TOF.h"
 #include "Button.h"
 #include "Encoder.h"
 #include "TB6612FNG.h"
