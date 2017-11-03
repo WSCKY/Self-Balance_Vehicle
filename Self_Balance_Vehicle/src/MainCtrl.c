@@ -43,7 +43,7 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 
 		MainCtrlLoopInit();
 	}
-	MPU6500_Read(&GyrOffset, IMU_Stabled);
+	MPU6050_Read(&GyrOffset, IMU_Stabled);
 
 	SpeedComputeTask();
 

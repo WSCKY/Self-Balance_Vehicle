@@ -56,9 +56,9 @@ void MPU6050_Init(void)
 }
 
 /*
- * read mpu6500 once.
+ * read mpu6050 once.
  */
-void MPU6500_Read(GyrRawDef *Offset, uint8_t IsOffset)
+void MPU6050_Read(GyrRawDef *Offset, uint8_t IsOffset)
 {
 	if(I2C_ReadDataBufferDMA_IT(MPU6050_DEVICE_ADDR, 0x3B, mpu_rx_buffer, 14) == 0) {
 		/* Reorganize received data */

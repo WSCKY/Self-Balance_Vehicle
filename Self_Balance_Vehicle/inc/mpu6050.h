@@ -73,7 +73,7 @@ typedef struct {
 #define MPU6050_DEVICE_ADDR            0xD0
 
 void MPU6050_Init(void);
-void MPU6500_Read(GyrRawDef *Offset, uint8_t IsOffset);
+void MPU6050_Read(GyrRawDef *Offset, uint8_t IsOffset);
 float GetMPU6050Temperature(void);
 AccDataDef *GetAccDataPointer(void);
 GyrDataDef *GetGyrDataPointer(void);
