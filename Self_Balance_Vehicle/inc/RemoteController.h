@@ -12,6 +12,8 @@
 #define RC_USART_IRQn               USART3_IRQn
 #define RC_USART_IRQHandler         USART3_IRQHandler
 
+#define RC_MIDDLE_VALUE             1024
+
 __packed typedef struct
 {
 	uint8_t startByte;
