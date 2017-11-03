@@ -14,28 +14,20 @@ static EulerAngle *pEulerAngle;
 static uint8_t IMU_Stabled = 0;
 static GyrRawDef GyrOffset = {0, 0, 0};
 
-static RC_CHANNLE_t *pRC;
-static uint8_t SignalLostFlag = 1;
-static uint32_t SignalLostCnt = 0;
-
-static float TOF_Distance = 0.0f;
-static uint8_t TOF_SignalLostFlag = 1;
-static uint32_t TOF_SignalLostCnt = 0;
-
-static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
 static float ExpSpeedL = 0, ExpSpeedR = 0;
+static TURN_DIR ExpDirL = STOP, ExpDirR = STOP;
+static float CtrlModeExpVel = 0.0f, CtrlModeExpYaw = 0.0f;
 
+/* private function prototype. */
 static uint8_t IMU_StableCheck(void);
 
-void MainCtrlLoopInit(void)
+static void MainCtrlLoopInit(void)
 {
 	MainCtrlLoopDt = 1.0f / SYSTEM_LOOP_RATE;
 	pMPU = GetMPU_RawDataPointer();
 	pEulerAngle = GetAttitudeAngle();
-
-	pRC = GetRC_ChannelData();
 }
-float exp_vel = 0, exp_yaw = 0;
+
 void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 {
 	if(_init_flag == 0) {
@@ -52,29 +44,6 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 
 	if(IMU_Stabled) {
 		FusionIMU_6Axis(MainCtrlLoopDt);
-	}
-
-	if(GetRCUpdateFlag()) {
-		SignalLostCnt = 0;
-		SignalLostFlag = 0;
-		RC_ParseData();
-	} else {
-		if(SignalLostCnt < 200)
-			SignalLostCnt ++;
-		else {
-			SignalLostFlag = 1;
-		}
-	}
-
-	if(GetNewTOFData(&TOF_Distance)) {
-		TOF_SignalLostCnt = 0;
-		TOF_SignalLostFlag = 0;
-	} else {
-		if(TOF_SignalLostCnt < 200)
-			TOF_SignalLostCnt ++;
-		else {
-			TOF_SignalLostFlag = 1;
-		}
 	}
 
 	if(BUTTON_PRESSED()) {
@@ -100,24 +69,11 @@ void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
 		RunEnableFlag = 0;
 	}
 
+	RfCtrlModeLoop();
+
 	AttitudeControlLoop(-1.8f, RunEnableFlag);
-	if(SignalLostFlag) {
-		exp_vel = 0; exp_yaw = 0;
-	} else {
-		exp_vel = ((1024 - pRC->Channel[1]) * 2 / 35.0f);
-		exp_yaw = ((1024 - pRC->Channel[0]) * 8 / 35.0f);
-	}
-
-	if(TOF_SignalLostFlag == 0) {
-		if(TOF_Distance <= 45.0f && exp_vel > 0) {
-			exp_vel = -20.0f;
-		} else if(TOF_Distance <= 60.0f && exp_vel > 0) {
-			exp_vel = 0.0f;
-		}
-	}
-
-	SpeedControlLoop(exp_vel, RunEnableFlag);
-	YawControlLoop(exp_yaw, RunEnableFlag);
+	SpeedControlLoop(CtrlModeExpVel, RunEnableFlag);
+	YawControlLoop(CtrlModeExpYaw, RunEnableFlag);
 
 	if(RunEnableFlag == 0) {
 		SetRunningDir(STOP, STOP);
@@ -169,12 +125,13 @@ uint8_t IMU_GotOffset(void)
 	return IMU_Stabled;
 }
 
-uint8_t GetSignalLostFlag(void)
-{
-	return SignalLostFlag;
-}
-
 uint8_t GetVehicleRunState(void)
 {
 	return RunEnableFlag;
+}
+
+void SetUsrCtrlVal(float ExpVel, float ExpYaw)
+{
+	CtrlModeExpVel = ExpVel;
+	CtrlModeExpYaw = ExpYaw;
 }

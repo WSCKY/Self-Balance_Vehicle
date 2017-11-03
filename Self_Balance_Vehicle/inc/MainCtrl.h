@@ -7,6 +7,7 @@
 #include "Button.h"
 #include "Encoder.h"
 #include "TB6612FNG.h"
+#include "RfCtrlMode.h"
 #include "pidController.h"
 #include "YawController.h"
 #include "SpeedController.h"
@@ -20,7 +21,7 @@
 #define RUN_DISABLE_CONFIRM            20
 
 uint8_t IMU_GotOffset(void);
-uint8_t GetSignalLostFlag(void);
 uint8_t GetVehicleRunState(void);
+void SetUsrCtrlVal(float ExpVel, float ExpYaw);
 
 #endif /* __MAINCTRL_H */
