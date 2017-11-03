@@ -54,20 +54,22 @@ void RfCtrlModeLoop(void)
 	}
 
 	if(SignalLostFlag) {
-		SetUsrCtrlVal(0, 0);
+		step_change(&ExpVel, 0, 0.4f, 0.4f);
+		step_change(&ExpYaw, 0, 4.0f, 4.0f);
 	} else {
-		step_change(&ExpVel, ((1024 - pRC->Channel[1]) * 2 / 35.0f), 0.4f, 0.4f);
-		step_change(&ExpYaw, ((1024 - pRC->Channel[0]) * 8 / 35.0f), 4.0f, 4.0f);
-		SetUsrCtrlVal(ExpVel, ExpYaw);
+		step_change(&ExpVel, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[1]) * 2 / 35.0f), 4.0f), 0.4f, 0.4f);
+		step_change(&ExpYaw, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[0]) * 8 / 35.0f), 16.0f), 4.0f, 4.0f);
 	}
 
 	if(TOF_SignalLostFlag == 0) {
-		if(TOF_Distance <= 45.0f) {// && exp_vel > 0
+		if(TOF_Distance <= 45.0f) {
 			
-		} else if(TOF_Distance <= 60.0f) {// && exp_vel > 0
+		} else if(TOF_Distance <= 60.0f) {
 			
 		}
 	}
+
+	SetUsrCtrlVal(ExpVel, ExpYaw);
 }
 
 uint8_t GetSignalLostFlag(void)
