@@ -12,6 +12,7 @@
 #include "Encoder.h"
 #include "SysTimer.h"
 #include "TB6612FNG.h"
+#include "RfCtrlMode.h"
 #include "RemoteController.h"
 
 #include "MainCtrl.h"
