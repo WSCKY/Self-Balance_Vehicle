@@ -10,4 +10,8 @@
 
 #define DEBUG_DATA_FRAME_RATE          (100)
 
+/* Battery Low Power Limit */
+#define BATTERY_NO_POWER_LIMIT         (11.0f)
+#define BATTERY_LOW_POWER_LIMIT        (11.2f)
+
 #endif /* __SYSCONFIG_H */
