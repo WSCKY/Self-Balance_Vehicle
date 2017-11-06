@@ -11,6 +11,9 @@ static float TOF_Distance = 0.0f;
 static uint8_t TOF_SignalLostFlag = 1;
 static uint32_t TOF_SignalLostCnt = 0;
 
+static uint8_t AvoidActionLevel = 0;
+static uint8_t AvoidActionEnable = 0;
+
 static float ExpVel = 0.0f, ExpYaw = 0.0f;
 
 static void CtrlModeInit(void)
@@ -54,19 +57,40 @@ void RfCtrlModeLoop(void)
 	}
 
 	if(SignalLostFlag) {
-		step_change(&ExpVel, 0, 0.4f, 0.4f);
+		AvoidActionEnable = 1;
+		if(AvoidActionLevel < 3) {
+			step_change(&ExpVel, 0, 0.4f, 0.4f);
+		}
 		step_change(&ExpYaw, 0, 4.0f, 4.0f);
 	} else {
-		step_change(&ExpVel, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[1]) * 2 / 35.0f), 4.0f), 0.4f, 0.4f);
+		if((AvoidActionLevel > 0) && (RC_MIDDLE_VALUE >= (pRC->Channel[1] - 70))) {
+			AvoidActionEnable = 1;
+			if(AvoidActionLevel == 1) {
+				step_change(&ExpVel, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[1]) * 1 / 35.0f), 4.0f), 0.6f, 0.6f);
+			}
+		} else {
+			AvoidActionEnable = 0;
+			step_change(&ExpVel, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[1]) * 2 / 35.0f), 4.0f), 0.4f, 0.4f);
+		}
 		step_change(&ExpYaw, apply_deadband(((RC_MIDDLE_VALUE - pRC->Channel[0]) * 8 / 35.0f), 16.0f), 4.0f, 4.0f);
 	}
 
 	if(TOF_SignalLostFlag == 0) {
-		if(TOF_Distance <= 45.0f) {
-			
+		if(TOF_Distance <= 30.0f) {
+			AvoidActionLevel = 3;
+			if(AvoidActionEnable)
+				step_change(&ExpVel, -8.0f, 0.8f, 0.8f);
 		} else if(TOF_Distance <= 60.0f) {
-			
+			AvoidActionLevel = 2;
+			if(AvoidActionEnable)
+				step_change(&ExpVel, 0, 0.6f, 0.6f);
+		} else if(TOF_Distance <= 100.0f) {
+			AvoidActionLevel = 1;
+		} else {
+			AvoidActionLevel = 0;
 		}
+	} else {
+		AvoidActionLevel = 0;
 	}
 
 	SetUsrCtrlVal(ExpVel, ExpYaw);
