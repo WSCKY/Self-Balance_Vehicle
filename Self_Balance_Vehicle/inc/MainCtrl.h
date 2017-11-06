@@ -8,6 +8,7 @@
 #include "Encoder.h"
 #include "TB6612FNG.h"
 #include "RfCtrlMode.h"
+#include "VoltageCheck.h"
 #include "pidController.h"
 #include "YawController.h"
 #include "SpeedController.h"
