@@ -38,6 +38,7 @@ int main(void)
 	MotorDriverInit();
 	EncoderDriverInit();
 	RemoteControlInit();
+	VoltageMeasureInit();
 
 	EstimatorInit();
 	SysTimerInit();
