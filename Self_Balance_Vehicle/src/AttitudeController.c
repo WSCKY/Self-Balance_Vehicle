@@ -22,9 +22,9 @@ static void ControllerInit(void)
 	AnglePID.I_sum = 0.0f;
 
 	GyrosPID.dt = (float)GYROS_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
-	GyrosPID.kp = 1.2f;
-	GyrosPID.ki = 0.0f;
-	GyrosPID.I_max = 100.0f;
+	GyrosPID.kp = 1.6f;
+	GyrosPID.ki = 0.1f;
+	GyrosPID.I_max = 60.0f;
 	GyrosPID.I_sum = 0.0f;
 }
 
@@ -40,7 +40,7 @@ void AttitudeControlLoop(float ExpAngle, uint8_t ControllerEnable)
 		pid_loop(&AnglePID, ExpAngle, pEulerAngle->pitch);
 	}
 
-	GyroY = GyroY * 0.7f + pGyr->gyrY * 0.3f;
+	GyroY = pGyr->gyrY;//GyroY * 0.7f + pGyr->gyrY * 0.3f;
 	if(ControllerTicks % GYROS_CTRL_RATE_DIV == 0) {
 		pid_loop(&GyrosPID, AnglePID.Output, GyroY);
 	}
