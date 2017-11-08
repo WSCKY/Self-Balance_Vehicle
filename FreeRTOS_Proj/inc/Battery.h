@@ -4,6 +4,6 @@
 #include "stm32f10x_adc.h"
 
 void VoltageMeasureInit(void);
-float ComputeBatteryVoltage(void);
+float GetSampleVoltage(void);
 
 #endif /* __BATTERY_H */
