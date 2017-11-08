@@ -13,13 +13,19 @@
 
 /* Private typedef ----------------------------------------------------------*/
 /* Private define -----------------------------------------------------------*/
+#define LED_STATE_TIMER_RATE           100
 /* Private macro ------------------------------------------------------------*/
 /* Private variables --------------------------------------------------------*/
-static uint16_t DelayTicksCnt = 0;
+static osTimerId LEDTimerHandle;
+static osTimerId DebugTimerHandle;
 
+static uint16_t LEDTicksCnt = 0;
 static uint16_t LEDFlashDelay = 0;
-static uint16_t DebugDataSendDelay = 0;
 /* Private function prototypes ----------------------------------------------*/
+static void SystemStartThread(void const *p);
+static void LEDStateTimerCallback(void const *p);
+static void DebugSendTimerCallback(void const *p);
+static void MainControlTimerCallback(void const *p);
 /* Private functions --------------------------------------------------------*/
 
 /**
@@ -29,9 +35,23 @@ static uint16_t DebugDataSendDelay = 0;
   */
 int main(void)
 {
+	SystemCoreClockUpdate();
+	SysTick_Config(SystemCoreClock / 1000);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+	osThreadDef(0, SystemStartThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	osThreadCreate(osThread(0), NULL);
+
+	/* Start scheduler */
+  osKernelStart();
+
+	/* Infinite loop */
+	for(;;);
+}
+
+static void SystemStartThread(void const *p)
+{
 	LED_Init();
-	DelayInit();
 	MPU6050_Init();
 	TOFDriverInit();
 	DebugPortInit();
@@ -41,41 +61,57 @@ int main(void)
 	VoltageMeasureInit();
 
 	EstimatorInit();
-	SysTimerInit();
 
-	LEDFlashDelay = 1000 / LED_FLASH_RATE_WAIT_STABLE;
-	DebugDataSendDelay = 1000 / DEBUG_DATA_FRAME_RATE;
-  /* Infinite loop */
-  while (1)
-  {
-		if(DelayTicksCnt % DebugDataSendDelay == 0) {
-			SendDataToMonitor();
-		}
+	osTimerDef(0, LEDStateTimerCallback);
+	LEDTimerHandle = osTimerCreate(osTimer(0), osTimerPeriodic, NULL);
+	osTimerStart(LEDTimerHandle, configTICK_RATE_HZ / LED_STATE_TIMER_RATE);
 
-		if(!IMU_GotOffset()) {
-			LEDFlashDelay = 1000 / LED_FLASH_RATE_WAIT_STABLE;
-		} else if(GetSignalLostFlag()) {
-			LEDFlashDelay = 1000 / LED_FLASH_RATE_SIGNAL_LOST;
+	osTimerDef(1, DebugSendTimerCallback);
+	DebugTimerHandle = osTimerCreate(osTimer(1), osTimerPeriodic, NULL);
+	osTimerStart(DebugTimerHandle, configTICK_RATE_HZ / DEBUG_DATA_FRAME_RATE);
+
+	osTimerDef(2, MainControlTimerCallback);
+	DebugTimerHandle = osTimerCreate(osTimer(2), osTimerPeriodic, NULL);
+	osTimerStart(DebugTimerHandle, configTICK_RATE_HZ / MAIN_CONTROLLER_LOOP_RATE);
+
+	vTaskDelete(NULL);
+	for(;;);
+}
+
+static void LEDStateTimerCallback(void const *p)
+{
+	if(!IMU_GotOffset()) {
+		LEDFlashDelay = LED_STATE_TIMER_RATE / LED_FLASH_RATE_WAIT_STABLE;
+	} else if(GetSignalLostFlag()) {
+		LEDFlashDelay = LED_STATE_TIMER_RATE / LED_FLASH_RATE_SIGNAL_LOST;
+	} else {
+		LEDFlashDelay = 0;
+	}
+
+	if(LEDFlashDelay != 0) {
+		if(LEDTicksCnt % LEDFlashDelay == 0)
+			LED_TOG();
+	} else {
+		if(GetVehicleRunState()) {
+			LED_ON();
 		} else {
-			LEDFlashDelay = 0;
+			LED_OFF();
 		}
+	}
 
-		if(LEDFlashDelay != 0) {
-			if(DelayTicksCnt % LEDFlashDelay == 0)
-				LED_TOG();
-		} else {
-			if(GetVehicleRunState()) {
-				LED_ON();
-			} else {
-				LED_OFF();
-			}
-		}
+	LEDTicksCnt ++;
+	if(LEDTicksCnt >= 60000)
+		LEDTicksCnt = 0;
+}
 
-		Delay(1);
-		DelayTicksCnt ++;
-		if(DelayTicksCnt >= 60000)
-			DelayTicksCnt = 0;
-  }
+static void DebugSendTimerCallback(void const *p)
+{
+	SendDataToMonitor();
+}
+
+static void MainControlTimerCallback(void const *p)
+{
+	SystemControlTask();
 }
 
 #ifdef  USE_FULL_ASSERT

@@ -23,12 +23,12 @@ static uint8_t IMU_StableCheck(void);
 
 static void MainCtrlLoopInit(void)
 {
-	MainCtrlLoopDt = 1.0f / SYSTEM_LOOP_RATE;
+	MainCtrlLoopDt = 1.0f / MAIN_CONTROLLER_LOOP_RATE;
 	pMPU = GetMPU_RawDataPointer();
 	pEulerAngle = GetAttitudeAngle();
 }
 
-void SystemControlTask(void) /* SYSTEM_LOOP_RATE Hz */
+void SystemControlTask(void) /* MAIN_CONTROLLER_LOOP_RATE Hz */
 {
 	if(_init_flag == 0) {
 		_init_flag = 1;
