@@ -10,7 +10,6 @@
 #include "mpu6050.h"
 #include "Encoder.h"
 #include "Battery.h"
-#include "SysTimer.h"
 #include "TB6612FNG.h"
 #include "RfCtrlMode.h"
 #include "RemoteController.h"

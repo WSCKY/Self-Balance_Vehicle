@@ -21,6 +21,8 @@
 #define RUN_ENABLE_CONFIRM             200
 #define RUN_DISABLE_CONFIRM            20
 
+void SystemControlTask(void);
+
 uint8_t IMU_GotOffset(void);
 uint8_t GetVehicleRunState(void);
 void SetUsrCtrlVal(float ExpVel, float ExpYaw);
