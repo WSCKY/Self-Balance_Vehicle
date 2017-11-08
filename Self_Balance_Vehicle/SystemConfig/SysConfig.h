@@ -14,4 +14,6 @@
 #define BATTERY_NO_POWER_LIMIT         (11.0f)
 #define BATTERY_LOW_POWER_LIMIT        (11.2f)
 
+#define BATTERY_VOLT_AMPL_FACTOR       (13.3f / 3.3f)
+
 #endif /* __SYSCONFIG_H */

@@ -74,7 +74,7 @@ void VoltageMeasureInit(void)
 	ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
-float ComputeBatteryVoltage(void)
+float GetSampleVoltage(void)
 {
-	return (((float)ADCConvertedValue * 3.3f * 11.5f) / (4096.0f * 1.5f));
+	return (((float)ADCConvertedValue * 3.3f) / 4096.0f);
 }

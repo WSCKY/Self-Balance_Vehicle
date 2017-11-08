@@ -10,7 +10,7 @@ static POWER_STATE_DEF BatteryPowerState = PowerOK;
 void VoltageCheckLoop(void)
 {
 	if(ControllerTicks % VOLT_CHECK_LOOP_RATE_DIV == 0) {
-		BatteryVolt = ComputeBatteryVoltage() * 0.02f + BatteryVolt * 0.98f;
+		BatteryVolt = GetSampleVoltage() * BATTERY_VOLT_AMPL_FACTOR * 0.02f + BatteryVolt * 0.98f;
 
 		if(BatteryVolt < BATTERY_NO_POWER_LIMIT) {
 			if(BatteryNoPowerTimeCnt < VOLT_STATE_CONFIRM_TICKS) {
