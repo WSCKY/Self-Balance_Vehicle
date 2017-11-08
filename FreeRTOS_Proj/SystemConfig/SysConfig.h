@@ -1,8 +1,8 @@
 #ifndef __SYSCONFIG_H
 #define __SYSCONFIG_H
 
-/* system controller loop rate (in Hz) */
-#define SYSTEM_LOOP_RATE               (200)
+/* main controller loop rate (in Hz) */
+#define MAIN_CONTROLLER_LOOP_RATE      (200)
 
 /* LED flash rate define */
 #define LED_FLASH_RATE_WAIT_STABLE     (10)
