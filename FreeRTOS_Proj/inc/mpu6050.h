@@ -4,7 +4,7 @@
 #include "stm32f10x_i2c.h"
 #include "stm32f10x_gpio.h"
 
-#include "Delay.h"
+#include "cmsis_os.h"
 
 #define MPU6050_GPIO_PORT              GPIOB
 #define MPU6050_GPIO_PORT_CLK          RCC_APB2Periph_GPIOB
