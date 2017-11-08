@@ -2,7 +2,7 @@
   *****************************************************************************
   * @file    Project/Self_Balance_Vehicle/src/main.c
   * @author  kyChu
-  * @version V0.0.1
+  * @version V0.1.1
   * @date    25-October-2017
   * @brief   Main program body.
   *****************************************************************************
@@ -23,6 +23,7 @@ static uint16_t LEDTicksCnt = 0;
 static uint16_t LEDFlashDelay = 0;
 /* Private function prototypes ----------------------------------------------*/
 static void SystemStartThread(void const *p);
+static void MainControlSubThread(void const *p);
 static void LEDStateTimerCallback(void const *p);
 static void DebugSendTimerCallback(void const *p);
 static void MainControlTimerCallback(void const *p);
@@ -74,6 +75,9 @@ static void SystemStartThread(void const *p)
 	DebugTimerHandle = osTimerCreate(osTimer(2), osTimerPeriodic, NULL);
 	osTimerStart(DebugTimerHandle, configTICK_RATE_HZ / MAIN_CONTROLLER_LOOP_RATE);
 
+	osThreadDef(1, MainControlSubThread, osPriorityNormal, 0, configMINIMAL_STACK_SIZE);
+	osThreadCreate(osThread(1), NULL);
+
 	vTaskDelete(NULL);
 	for(;;);
 }
@@ -112,6 +116,17 @@ static void DebugSendTimerCallback(void const *p)
 static void MainControlTimerCallback(void const *p)
 {
 	SystemControlTask();
+}
+
+static void MainControlSubThread(void const *p)
+{
+	uint32_t PreviousWakeTime = osKernelSysTick();
+	uint32_t DelayTime = configTICK_RATE_HZ / MAIN_CONTROLLER_LOOP_RATE;
+	for(;;) {
+		osDelayUntil(&PreviousWakeTime, DelayTime);
+
+		VoltageCheckLoop();
+	}
 }
 
 #ifdef  USE_FULL_ASSERT

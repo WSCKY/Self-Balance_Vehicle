@@ -64,8 +64,6 @@ void SystemControlTask(void) /* MAIN_CONTROLLER_LOOP_RATE Hz */
 		ButtonConfirmTimeCnt = 0;
 	}
 
-	VoltageCheckLoop();
-
 	if(ABS(pEulerAngle->pitch) > 50.0f || \
 		IMU_Stabled == 0) {
 		RunEnableFlag = 0;
