@@ -12,7 +12,7 @@ void SysTimerInit(void)
   RCC_APB1PeriphClockCmd(SYS_TIMER_CLK, ENABLE);
 
 	/* Time base configuration */
-  TIM_TimeBaseStructure.TIM_Period = (8000000 / SYSTEM_LOOP_RATE) - 1; /* 200Hz */
+  TIM_TimeBaseStructure.TIM_Period = (8000000 / MAIN_CONTROLLER_LOOP_RATE) - 1; /* 200Hz */
   TIM_TimeBaseStructure.TIM_Prescaler = 8;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;

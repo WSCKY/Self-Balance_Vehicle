@@ -15,13 +15,13 @@ static void ControllerInit(void)
 	pGyr = GetGyrDataPointer();
 	pEulerAngle = GetAttitudeAngle();
 
-	AnglePID.dt = (float)ANGLE_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
+	AnglePID.dt = (float)ANGLE_CTRL_RATE_DIV / (float)MAIN_CONTROLLER_LOOP_RATE;
 	AnglePID.kp = 22.0f;
 	AnglePID.ki = 0.0f;
 	AnglePID.I_max = 0.0f;
 	AnglePID.I_sum = 0.0f;
 
-	GyrosPID.dt = (float)GYROS_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
+	GyrosPID.dt = (float)GYROS_CTRL_RATE_DIV / (float)MAIN_CONTROLLER_LOOP_RATE;
 	GyrosPID.kp = 1.6f;
 	GyrosPID.ki = 0.1f;
 	GyrosPID.I_max = 60.0f;

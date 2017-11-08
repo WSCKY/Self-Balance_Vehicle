@@ -18,7 +18,7 @@ static float ExpVel = 0.0f, ExpYaw = 0.0f;
 
 static void CtrlModeInit(void)
 {
-	_loop_time = 1000 / RF_CTRL_MODE_LOOP_RATE;
+	_loop_time = 1000 / MAIN_CONTROLLER_LOOP_RATE;
 
 	SignalLostCnt = 0;
 	SignalLostFlag = 1;

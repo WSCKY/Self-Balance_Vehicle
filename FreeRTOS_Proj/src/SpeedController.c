@@ -24,7 +24,7 @@ static PID SpeedPID = {0};
 
 static void ControllerInit(void)
 {
-	SpeedPID.dt = (float)SPEED_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
+	SpeedPID.dt = (float)SPEED_CTRL_RATE_DIV / (float)MAIN_CONTROLLER_LOOP_RATE;
 	SpeedPID.kp = 6.0f;
 	SpeedPID.ki = 1.0f;
 	SpeedPID.I_max = 50.0f;

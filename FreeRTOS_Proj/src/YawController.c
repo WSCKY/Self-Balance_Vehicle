@@ -10,7 +10,7 @@ static void ControllerInit(void)
 {
 	pGyr = GetGyrDataPointer();
 
-	YawCtrlPID.dt = (float)YAW_CTRL_RATE_DIV / (float)SYSTEM_LOOP_RATE;
+	YawCtrlPID.dt = (float)YAW_CTRL_RATE_DIV / (float)MAIN_CONTROLLER_LOOP_RATE;
 	YawCtrlPID.kp = 2.0f;
 	YawCtrlPID.ki = 2.0f;
 	YawCtrlPID.I_max = 100.0f;
